@@ -67,7 +67,7 @@ export default function ExtractionResults({
             )}
 
             {/* Insurance Match - only show if we have a match and no error */}
-            {!error && (
+            {!error && !isProcessing && (
                 <div className="mt-6 bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-800 rounded-lg p-4">
                     {insuranceMatch ? (
                         <>
@@ -88,7 +88,7 @@ export default function ExtractionResults({
                                 </div>
                             </div>
                         </>
-                    ) : !isProcessing && text && (
+                    ) : (
                         <>
                             <h4 className="font-medium text-yellow-800 dark:text-yellow-300 mb-3">No Automatic Match Found</h4>
                             <div className="space-y-3">
