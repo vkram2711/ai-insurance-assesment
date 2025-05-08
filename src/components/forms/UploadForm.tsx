@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { InsuranceMatch } from '@/types/insurance'
 import ExtractionResults from '@/components/ExtractionResults'
 import FileStatus from '@/components/FileStatus'
-import { FILE_TYPES, FileType } from '@/lib/parser'
+import { FILE_TYPES, FileType } from '@/types/files'
 
 interface FileResult {
     fileName: string;

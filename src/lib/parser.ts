@@ -1,15 +1,9 @@
+'use server';
+
 import PDFParser from "pdf2json";
 import mammoth from "mammoth";
 import {PDFParseError, DocumentError} from "@/types/errors";
-
-// File type constants
-export const FILE_TYPES = {
-    PDF: 'application/pdf',
-    TXT: 'text/plain',
-    DOCX: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-} as const;
-
-export type FileType = typeof FILE_TYPES[keyof typeof FILE_TYPES];
+import { FILE_TYPES, FileType } from "@/types/files";
 
 export async function parseDocument(buffer: Buffer, mimeType: FileType): Promise<string> {
     switch (mimeType) {
