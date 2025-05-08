@@ -1,3 +1,8 @@
 export interface PrimaryInsured {
   name: string;
-} 
+}
+
+export interface Insured {
+  internalId: string;
+  name: string;
+}
