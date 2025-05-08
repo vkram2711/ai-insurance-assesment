@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
         await writer.close();
     };
 
-    await (async () => {
+    void (async () => {
         try {
             const formData = await req.formData()
             const file = formData.get('file') as File
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
             });
             await writer.close();
         } catch (error) {
-            const {message, statusCode} = ErrorHandler.handle(error)
+            const {message} = ErrorHandler.handle(error)
             await sendError(message);
         }
     })();

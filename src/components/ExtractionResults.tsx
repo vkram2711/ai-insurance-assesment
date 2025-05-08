@@ -16,16 +16,7 @@ export default function ExtractionResults({
     isProcessing,
     processingSteps 
 }: ExtractionResultsProps) {
-    if (error) {
-        return (
-            <div className="w-full bg-red-50 border border-red-200 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-red-700 mb-2">Error</h3>
-                <p className="text-red-600">{error}</p>
-            </div>
-        )
-    }
-
-    if (!text && !insuranceMatch && !isProcessing) {
+    if (!text && !insuranceMatch && !isProcessing && !error) {
         return (
             <div className="w-full bg-gray-50 rounded-lg p-4">
                 <h3 className="text-lg font-semibold mb-2">Results</h3>
@@ -55,8 +46,21 @@ export default function ExtractionResults({
                 ))}
             </div>
 
-            {/* Insurance Match */}
-            {insuranceMatch && (
+            {/* Error Display */}
+            {error && (
+                <div className="mt-4 bg-red-50 border border-red-100 rounded-lg p-4">
+                    <div className="flex items-center space-x-2">
+                        <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        </svg>
+                        <h4 className="text-sm font-medium text-red-800">Error Occurred</h4>
+                    </div>
+                    <p className="mt-2 text-sm text-red-600">{error}</p>
+                </div>
+            )}
+
+            {/* Insurance Match - only show if we have a match and no error */}
+            {insuranceMatch && !error && (
                 <div className="mt-6 bg-green-50 border border-green-100 rounded-lg p-4">
                     <h4 className="font-medium text-green-800 mb-3">Insurance Match Found</h4>
                     <div className="space-y-3">
