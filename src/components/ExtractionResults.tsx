@@ -1,5 +1,6 @@
-import { InsuranceMatch } from '@/types/insurance'
+import { InsuranceMatch, Insured } from '@/types/insurance'
 import MatchScore from './MatchScore'
+import InsuredSelector from './InsuredSelector'
 
 interface ExtractionResultsProps {
     text: string | null
@@ -7,6 +8,7 @@ interface ExtractionResultsProps {
     error: string | null
     isProcessing: boolean
     processingSteps: string[]
+    onManualSelect?: (insured: Insured) => void
 }
 
 export default function ExtractionResults({ 
@@ -14,7 +16,8 @@ export default function ExtractionResults({
     insuranceMatch, 
     error, 
     isProcessing,
-    processingSteps 
+    processingSteps,
+    onManualSelect
 }: ExtractionResultsProps) {
     if (!text && !insuranceMatch && !isProcessing && !error) {
         return (
@@ -64,22 +67,38 @@ export default function ExtractionResults({
             )}
 
             {/* Insurance Match - only show if we have a match and no error */}
-            {insuranceMatch && !error && (
+            {!error && (
                 <div className="mt-6 bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-800 rounded-lg p-4">
-                    <h4 className="font-medium text-green-800 dark:text-green-300 mb-3">Insurance Match Found</h4>
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-1">
-                                <p className="text-sm font-medium text-green-700 dark:text-green-400">
-                                    {insuranceMatch.insured.name}
-                                </p>
-                                <p className="text-xs text-green-600 dark:text-green-500">
-                                    ID: {insuranceMatch.insured.internalId}
-                                </p>
+                    {insuranceMatch ? (
+                        <>
+                            <h4 className="font-medium text-green-800 dark:text-green-300 mb-3">
+                                {insuranceMatch.isManual ? 'Manually Selected Insured' : 'Insurance Match Found'}
+                            </h4>
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-1">
+                                        <p className="text-sm font-medium text-green-700 dark:text-green-400">
+                                            {insuranceMatch.insured.name}
+                                        </p>
+                                        <p className="text-xs text-green-600 dark:text-green-500">
+                                            ID: {insuranceMatch.insured.internalId}
+                                        </p>
+                                    </div>
+                                    {!insuranceMatch.isManual && <MatchScore score={insuranceMatch.score} />}
+                                </div>
                             </div>
-                            <MatchScore score={insuranceMatch.score} />
-                        </div>
-                    </div>
+                        </>
+                    ) : !isProcessing && text && (
+                        <>
+                            <h4 className="font-medium text-yellow-800 dark:text-yellow-300 mb-3">No Automatic Match Found</h4>
+                            <div className="space-y-3">
+                                <p className="text-sm text-yellow-700 dark:text-yellow-400">
+                                    Please select the correct insured from the list below:
+                                </p>
+                                <InsuredSelector onSelect={onManualSelect || (() => {})} />
+                            </div>
+                        </>
+                    )}
                 </div>
             )}
         </div>

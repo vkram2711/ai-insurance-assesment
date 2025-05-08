@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { InsuranceMatch } from '@/types/insurance'
+import { InsuranceMatch, Insured } from '@/types/insurance'
 import ExtractionResults from '@/components/ExtractionResults'
 import FileStatus from '@/components/FileStatus'
 import { FILE_TYPES, FileType } from '@/types/files'
@@ -17,11 +17,12 @@ interface FileResult {
 interface UploadFormProps {
     onUpload: (files: File[]) => Promise<void>;
     onRemoveFile?: (index: number) => void;
+    onManualSelect?: (fileIndex: number, insured: Insured) => void;
     isProcessing?: boolean;
     fileResults: FileResult[];
 }
 
-export default function UploadForm({ onUpload, onRemoveFile, isProcessing = false, fileResults }: UploadFormProps) {
+export default function UploadForm({ onUpload, onRemoveFile, onManualSelect, isProcessing = false, fileResults }: UploadFormProps) {
     const [files, setFiles] = useState<File[]>([])
     const [isDragging, setIsDragging] = useState(false)
     const [expandedFiles, setExpandedFiles] = useState<Set<number>>(new Set())
@@ -185,6 +186,7 @@ export default function UploadForm({ onUpload, onRemoveFile, isProcessing = fals
                                                     isProcessing={isProcessing && index === fileResults.findIndex(r => r.fileName === file.name)}
                                                     hasError={!!result?.error}
                                                     hasResults={!!result?.insuranceMatch}
+                                                    needsManualSelection={!!result?.text && !result?.insuranceMatch && !result?.error && !isProcessing}
                                                 />
                                             </div>
                                         </div>
@@ -195,7 +197,11 @@ export default function UploadForm({ onUpload, onRemoveFile, isProcessing = fals
                                                         <span className="text-red-600 dark:text-red-400">{result.error}</span>
                                                     ) : result.insuranceMatch ? (
                                                         <span className="text-green-600 dark:text-green-400">
-                                                            Match: {result.insuranceMatch.insured.name} ({Math.round(result.insuranceMatch.score * 100)}%)
+                                                            {result.insuranceMatch.isManual ? (
+                                                                <>Manual: {result.insuranceMatch.insured.name}</>
+                                                            ) : (
+                                                                <>Match: {result.insuranceMatch.insured.name} ({Math.round(result.insuranceMatch.score * 100)}%)</>
+                                                            )}
                                                         </span>
                                                     ) : result.processingSteps.length > 0 ? (
                                                         <span className="text-blue-600 dark:text-blue-400">
@@ -214,21 +220,26 @@ export default function UploadForm({ onUpload, onRemoveFile, isProcessing = fals
                                             </button>
                                         </div>
                                     </div>
-                                    {result && (
-                                        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                                            isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
-                                        }`}>
-                                            <div className="p-4 bg-white dark:bg-gray-800">
-                                                <ExtractionResults 
-                                                    text={result.text}
-                                                    insuranceMatch={result.insuranceMatch}
-                                                    error={result.error}
-                                                    isProcessing={isProcessing}
-                                                    processingSteps={result.processingSteps}
-                                                />
+                                    <div 
+                                        className={`grid transition-all duration-500 ease-in-out ${
+                                            isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+                                        }`}
+                                    >
+                                        {hasResults && (
+                                            <div className="overflow-hidden">
+                                                <div className="p-4">
+                                                    <ExtractionResults
+                                                        text={result.text}
+                                                        insuranceMatch={result.insuranceMatch}
+                                                        error={result.error}
+                                                        isProcessing={isProcessing && index === fileResults.findIndex(r => r.fileName === file.name)}
+                                                        processingSteps={result.processingSteps}
+                                                        onManualSelect={onManualSelect ? (insured) => onManualSelect(index, insured) : undefined}
+                                                    />
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
+                                        )}
+                                    </div>
                                 </div>
                             )
                         })}

@@ -1,5 +1,6 @@
 import {NextRequest} from 'next/server'
-import {parseDocument, FILE_TYPES, FileType} from "@/lib/parser";
+import {parseDocument} from "@/lib/parser";
+import {FILE_TYPES, FileType} from "@/types/files";
 import {streamExtractPrimaryInsured} from "@/lib/llm";
 import {findIdByFuzzyName} from "@/lib/match";
 import {ValidationError, ErrorHandler} from '@/types/errors';

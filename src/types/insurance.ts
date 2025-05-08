@@ -7,7 +7,8 @@ export interface Insured {
   name: string;
 }
 
-export interface InsuranceMatch{
+export interface InsuranceMatch {
   insured: Insured;
   score: number;
+  isManual?: boolean;
 }

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import UploadForm from '@/components/forms/UploadForm'
-import { InsuranceMatch } from '@/types/insurance'
+import { InsuranceMatch, Insured } from '@/types/insurance'
 
 interface FileResult {
     fileName: string;
@@ -111,6 +111,21 @@ export default function HomePage() {
         setFileResults(prev => prev.filter((_, i) => i !== index))
     }
 
+    const handleManualSelect = (fileIndex: number, insured: Insured) => {
+        setFileResults(prev => {
+            const newResults = [...prev]
+            newResults[fileIndex] = {
+                ...newResults[fileIndex],
+                insuranceMatch: {
+                    insured,
+                    score: 1.0,
+                    isManual: true
+                }
+            }
+            return newResults
+        })
+    }
+
     return (
         <main className="min-h-screen flex flex-col items-center justify-center p-6">
             <h1 className="text-3xl font-bold mb-8">PDF Upload and Parse</h1>
@@ -119,6 +134,7 @@ export default function HomePage() {
                 <UploadForm 
                     onUpload={handleUpload} 
                     onRemoveFile={handleRemoveFile}
+                    onManualSelect={handleManualSelect}
                     isProcessing={isProcessing}
                     fileResults={fileResults}
                 />
