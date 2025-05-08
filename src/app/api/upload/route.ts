@@ -1,5 +1,5 @@
 import {NextRequest} from 'next/server'
-import {parsePdf} from "@/lib/parser";
+import {parseDocument} from "@/lib/parser";
 import {streamExtractPrimaryInsured} from "@/lib/llm";
 import {findIdByFuzzyName} from "@/lib/match";
 import {ValidationError, ErrorHandler} from '@/types/errors';
@@ -37,17 +37,19 @@ export async function POST(req: NextRequest) {
                 throw new ValidationError('No file uploaded')
             }
 
-            if (!file.type.includes('pdf')) {
-                throw new ValidationError('File must be a PDF')
+            const allowedTypes = ['application/pdf', 'text/plain', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+            if (!allowedTypes.includes(file.type)) {
+                throw new ValidationError('File must be a PDF, TXT, or DOCX')
             }
 
             await sendProgress('Starting file processing...');
             const arrayBuffer = await file.arrayBuffer()
             const buffer = Buffer.from(arrayBuffer)
 
-            await sendProgress('Parsing PDF...');
-            const text = await parsePdf(buffer)
-            await sendResult({ text: text });
+            await sendProgress(`Parsing ${file.type === 'application/pdf' ? 'PDF' : file.type === 'text/plain' ? 'TXT' : 'DOCX'}...`);
+            const text = await parseDocument(buffer, file.type)
+            await sendProgress('Text extraction complete');
+            await sendResult({ type: 'extracted_text', text: text });
 
             await sendProgress('Extracting primary insured information...');
             let llmOutput = '';

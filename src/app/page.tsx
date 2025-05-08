@@ -75,10 +75,9 @@ export default function HomePage() {
                                         }
                                         break
                                     case 'result':
-                                        if (data.data.text) {
+                                        if (data.data.type === 'extracted_text') {
                                             currentResult.text = data.data.text
-                                        }
-                                        if (data.data.insuranceMatch) {
+                                        } else if (data.data.insuranceMatch) {
                                             currentResult.insuranceMatch = data.data.insuranceMatch
                                         }
                                         break
@@ -108,6 +107,10 @@ export default function HomePage() {
         setIsProcessing(false)
     }
 
+    const handleRemoveFile = (index: number) => {
+        setFileResults(prev => prev.filter((_, i) => i !== index))
+    }
+
     return (
         <main className="min-h-screen flex flex-col items-center justify-center p-6">
             <h1 className="text-3xl font-bold mb-8">PDF Upload and Parse</h1>
@@ -115,6 +118,7 @@ export default function HomePage() {
             <div className="w-full max-w-4xl">
                 <UploadForm 
                     onUpload={handleUpload} 
+                    onRemoveFile={handleRemoveFile}
                     isProcessing={isProcessing}
                     fileResults={fileResults}
                 />

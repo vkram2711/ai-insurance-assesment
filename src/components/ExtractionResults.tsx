@@ -40,8 +40,8 @@ export default function ExtractionResults({
                         }`}>
                             {step}
                         </div>
-                        {/* Show extracted text right after parsing step */}
-                        {step.includes('Parsing PDF') && text && (
+                        {/* Show extracted text after text extraction is complete */}
+                        {step === 'Text extraction complete' && text && (
                             <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
                                 {text}
                             </div>

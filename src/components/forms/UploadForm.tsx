@@ -15,11 +15,12 @@ interface FileResult {
 
 interface UploadFormProps {
     onUpload: (files: File[]) => Promise<void>;
+    onRemoveFile?: (index: number) => void;
     isProcessing?: boolean;
     fileResults: FileResult[];
 }
 
-export default function UploadForm({ onUpload, isProcessing = false, fileResults }: UploadFormProps) {
+export default function UploadForm({ onUpload, onRemoveFile, isProcessing = false, fileResults }: UploadFormProps) {
     const [files, setFiles] = useState<File[]>([])
     const [isDragging, setIsDragging] = useState(false)
     const [expandedFiles, setExpandedFiles] = useState<Set<number>>(new Set())
@@ -44,14 +45,16 @@ export default function UploadForm({ onUpload, isProcessing = false, fileResults
         e.preventDefault()
         setIsDragging(false)
         
-        const droppedFiles = Array.from(e.dataTransfer.files).filter(file => file.type === 'application/pdf')
+        const allowedTypes = ['application/pdf', 'text/plain', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+        const droppedFiles = Array.from(e.dataTransfer.files).filter(file => allowedTypes.includes(file.type))
         if (droppedFiles.length > 0) {
             setFiles(prev => [...prev, ...droppedFiles])
         }
     }
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const selectedFiles = Array.from(e.target.files || []).filter(file => file.type === 'application/pdf')
+        const allowedTypes = ['application/pdf', 'text/plain', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+        const selectedFiles = Array.from(e.target.files || []).filter(file => allowedTypes.includes(file.type))
         if (selectedFiles.length > 0) {
             setFiles(prev => [...prev, ...selectedFiles])
         }
@@ -64,6 +67,7 @@ export default function UploadForm({ onUpload, isProcessing = false, fileResults
             newSet.delete(index)
             return newSet
         })
+        onRemoveFile?.(index)
     }
 
     const toggleExpand = (index: number) => {
@@ -98,7 +102,7 @@ export default function UploadForm({ onUpload, isProcessing = false, fileResults
             >
                 <input 
                     type="file" 
-                    accept=".pdf" 
+                    accept=".pdf,.txt,.docx" 
                     onChange={handleFileSelect}
                     className="hidden"
                     id="file-upload"
@@ -125,12 +129,12 @@ export default function UploadForm({ onUpload, isProcessing = false, fileResults
                         </svg>
                         <div className="text-sm text-gray-600 dark:text-gray-400">
                             <span className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
-                                Upload PDF files
+                                Upload files
                             </span>
                             {' '}or drag and drop
                         </div>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
-                            PDF up to 10MB
+                            PDF, TXT, or DOCX up to 10MB
                         </p>
                     </div>
                 </label>
