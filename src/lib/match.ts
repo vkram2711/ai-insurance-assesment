@@ -37,16 +37,16 @@ export const INSUREDS: Insured[] = [
  * Calculates the Jaro-Winkler distance between two strings
  * Returns a value between 0 and 1, where 1 means the strings are identical
  */
-function jaroWinklerDistance(s1: string, s2: string): number {
-    // Convert to lowercase for case-insensitive comparison
-    s1 = s1.toLowerCase();
-    s2 = s2.toLowerCase();
+export function jaroWinklerDistance(s1: string, s2: string): number {
+    // If one of the strings is empty, return 0
+    if (s1.length === 0 || s2.length === 0) return 0.0;
+
+    // Normalize whitespace and convert to lowercase for case-insensitive comparison
+    s1 = s1.trim().replace(/\s+/g, ' ').toLowerCase();
+    s2 = s2.trim().replace(/\s+/g, ' ').toLowerCase();
 
     // If the strings are equal, return 1
     if (s1 === s2) return 1.0;
-
-    // If one of the strings is empty, return 0
-    if (s1.length === 0 || s2.length === 0) return 0.0;
 
     // Calculate the Jaro distance
     const matchDistance = Math.floor(Math.max(s1.length, s2.length) / 2) - 1;

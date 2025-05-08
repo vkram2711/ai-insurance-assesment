@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { InsuranceMatch } from '@/types/insurance'
 import ExtractionResults from '@/components/ExtractionResults'
 import FileStatus from '@/components/FileStatus'
+import { FILE_TYPES, FileType } from '@/lib/parser'
 
 interface FileResult {
     fileName: string;
@@ -45,16 +46,16 @@ export default function UploadForm({ onUpload, onRemoveFile, isProcessing = fals
         e.preventDefault()
         setIsDragging(false)
         
-        const allowedTypes = ['application/pdf', 'text/plain', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
-        const droppedFiles = Array.from(e.dataTransfer.files).filter(file => allowedTypes.includes(file.type))
+        const allowedTypes = [FILE_TYPES.PDF, FILE_TYPES.TXT, FILE_TYPES.DOCX] as const
+        const droppedFiles = Array.from(e.dataTransfer.files).filter(file => allowedTypes.includes(file.type as FileType))
         if (droppedFiles.length > 0) {
             setFiles(prev => [...prev, ...droppedFiles])
         }
     }
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const allowedTypes = ['application/pdf', 'text/plain', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
-        const selectedFiles = Array.from(e.target.files || []).filter(file => allowedTypes.includes(file.type))
+        const allowedTypes = [FILE_TYPES.PDF, FILE_TYPES.TXT, FILE_TYPES.DOCX] as const
+        const selectedFiles = Array.from(e.target.files || []).filter(file => allowedTypes.includes(file.type as FileType))
         if (selectedFiles.length > 0) {
             setFiles(prev => [...prev, ...selectedFiles])
         }

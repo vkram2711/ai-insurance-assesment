@@ -1,14 +1,23 @@
 import PDFParser from "pdf2json";
 import mammoth from "mammoth";
-import { PDFParseError, DocumentError } from "@/types/errors";
+import {PDFParseError, DocumentError} from "@/types/errors";
 
-export async function parseDocument(buffer: Buffer, mimeType: string): Promise<string> {
+// File type constants
+export const FILE_TYPES = {
+    PDF: 'application/pdf',
+    TXT: 'text/plain',
+    DOCX: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+} as const;
+
+export type FileType = typeof FILE_TYPES[keyof typeof FILE_TYPES];
+
+export async function parseDocument(buffer: Buffer, mimeType: FileType): Promise<string> {
     switch (mimeType) {
-        case 'application/pdf':
+        case FILE_TYPES.PDF:
             return parsePdf(buffer);
-        case 'text/plain':
+        case FILE_TYPES.TXT:
             return parseTxt(buffer);
-        case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+        case FILE_TYPES.DOCX:
             return parseDocx(buffer);
         default:
             throw new DocumentError(`Unsupported file type: ${mimeType}`);
@@ -72,7 +81,7 @@ function parseTxt(buffer: Buffer): Promise<string> {
 
 function parseDocx(buffer: Buffer): Promise<string> {
     return new Promise((resolve, reject) => {
-        mammoth.extractRawText({ buffer })
+        mammoth.extractRawText({buffer})
             .then(result => {
                 const text = result.value
                 if (!text.trim()) {

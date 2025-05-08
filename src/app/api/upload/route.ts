@@ -1,5 +1,5 @@
 import {NextRequest} from 'next/server'
-import {parseDocument} from "@/lib/parser";
+import {parseDocument, FILE_TYPES, FileType} from "@/lib/parser";
 import {streamExtractPrimaryInsured} from "@/lib/llm";
 import {findIdByFuzzyName} from "@/lib/match";
 import {ValidationError, ErrorHandler} from '@/types/errors';
@@ -37,8 +37,8 @@ export async function POST(req: NextRequest) {
                 throw new ValidationError('No file uploaded')
             }
 
-            const allowedTypes = ['application/pdf', 'text/plain', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
-            if (!allowedTypes.includes(file.type)) {
+            const allowedTypes = [FILE_TYPES.PDF, FILE_TYPES.TXT, FILE_TYPES.DOCX] as const
+            if (!allowedTypes.includes(file.type as FileType)) {
                 throw new ValidationError('File must be a PDF, TXT, or DOCX')
             }
 
@@ -46,8 +46,8 @@ export async function POST(req: NextRequest) {
             const arrayBuffer = await file.arrayBuffer()
             const buffer = Buffer.from(arrayBuffer)
 
-            await sendProgress(`Parsing ${file.type === 'application/pdf' ? 'PDF' : file.type === 'text/plain' ? 'TXT' : 'DOCX'}...`);
-            const text = await parseDocument(buffer, file.type)
+            await sendProgress(`Parsing ${file.type === FILE_TYPES.PDF ? 'PDF' : file.type === FILE_TYPES.TXT ? 'TXT' : 'DOCX'}...`);
+            const text = await parseDocument(buffer, file.type as FileType)
             await sendProgress('Text extraction complete');
             await sendResult({ type: 'extracted_text', text: text });
 
