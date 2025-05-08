@@ -10,30 +10,52 @@ export default function HomePage() {
     const [insuranceMatch, setInsuranceMatch] = useState<InsuranceMatch | null>(null)
     const [error, setError] = useState<string | null>(null)
     const [isProcessing, setIsProcessing] = useState(false)
+    const [processingSteps, setProcessingSteps] = useState<string[]>([])
 
     const handleUpload = async (file: File) => {
         setIsProcessing(true)
         setError(null)
         setText(null)
         setInsuranceMatch(null)
+        setProcessingSteps([])
 
         const formData = new FormData()
         formData.append('file', file)
 
         try {
-            const res = await fetch('/api/upload', {
+            const response = await fetch('/api/upload', {
                 method: 'POST',
                 body: formData,
             })
 
-            const data = await res.json()
-            
-            if (!res.ok) {
-                throw new Error(data.error || 'Failed to process PDF')
-            }
+            const reader = response.body?.getReader()
+            if (!reader) throw new Error('Failed to start processing')
 
-            setText(data.text)
-            setInsuranceMatch(data.insuranceMatch)
+            while (true) {
+                const { done, value } = await reader.read()
+                if (done) break
+
+                const chunk = new TextDecoder().decode(value)
+                const lines = chunk.split('\n')
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const data = JSON.parse(line.slice(6))
+                        
+                        switch (data.type) {
+                            case 'progress':
+                                setProcessingSteps(prev => [...prev, data.message])
+                                break
+                            case 'result':
+                                setText(data.data.text)
+                                setInsuranceMatch(data.data.insuranceMatch)
+                                break
+                            case 'error':
+                                throw new Error(data.error)
+                        }
+                    }
+                }
+            }
         } catch (err: any) {
             setError(err.message || 'An error occurred')
         } finally {
@@ -56,6 +78,7 @@ export default function HomePage() {
                         insuranceMatch={insuranceMatch}
                         error={error}
                         isProcessing={isProcessing}
+                        processingSteps={processingSteps}
                     />
                 </div>
             </div>
