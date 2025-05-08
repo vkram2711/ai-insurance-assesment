@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { InsuranceMatch } from '@/types/insurance'
 import ExtractionResults from '@/components/ExtractionResults'
+import FileStatus from '@/components/FileStatus'
 
 interface FileResult {
     fileName: string;
@@ -151,7 +152,14 @@ export default function UploadForm({ onUpload, isProcessing = false, fileResults
                                                     <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                                                 </svg>
                                             </button>
-                                            <span className="text-sm text-gray-600 dark:text-gray-300">{file.name}</span>
+                                            <div className="flex items-center space-x-3">
+                                                <span className="text-sm text-gray-600 dark:text-gray-300">{file.name}</span>
+                                                <FileStatus 
+                                                    isProcessing={isProcessing && index === fileResults.findIndex(r => r.fileName === file.name)}
+                                                    hasError={!!result?.error}
+                                                    hasResults={!!result?.insuranceMatch}
+                                                />
+                                            </div>
                                         </div>
                                         <button
                                             onClick={() => removeFile(index)}
