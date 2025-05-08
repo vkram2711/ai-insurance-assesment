@@ -164,10 +164,10 @@ export default function UploadForm({ onUpload, isProcessing = false, fileResults
                                         <div className="flex items-center space-x-3">
                                             <button
                                                 onClick={() => toggleExpand(index)}
-                                                className={`text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 ${hasResults ? '' : 'invisible'}`}
+                                                className={`text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors duration-200 ${hasResults ? '' : 'invisible'}`}
                                             >
                                                 <svg 
-                                                    className={`h-5 w-5 transform transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                                                    className={`h-5 w-5 transform transition-transform duration-300 ease-in-out ${isExpanded ? 'rotate-90' : ''}`}
                                                     viewBox="0 0 20 20" 
                                                     fill="currentColor"
                                                 >
@@ -209,15 +209,19 @@ export default function UploadForm({ onUpload, isProcessing = false, fileResults
                                             </button>
                                         </div>
                                     </div>
-                                    {isExpanded && result && (
-                                        <div className="p-4 bg-white dark:bg-gray-800">
-                                            <ExtractionResults 
-                                                text={result.text}
-                                                insuranceMatch={result.insuranceMatch}
-                                                error={result.error}
-                                                isProcessing={isProcessing}
-                                                processingSteps={result.processingSteps}
-                                            />
+                                    {result && (
+                                        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                                            isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
+                                        }`}>
+                                            <div className="p-4 bg-white dark:bg-gray-800">
+                                                <ExtractionResults 
+                                                    text={result.text}
+                                                    insuranceMatch={result.insuranceMatch}
+                                                    error={result.error}
+                                                    isProcessing={isProcessing}
+                                                    processingSteps={result.processingSteps}
+                                                />
+                                            </div>
                                         </div>
                                     )}
                                 </div>
