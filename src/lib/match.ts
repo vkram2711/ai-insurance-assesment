@@ -1,4 +1,6 @@
-export const INSUREDS = [
+import {InsuranceMatch, Insured} from "@/types/insurance";
+
+export const INSUREDS: Insured[] = [
     {internalId: "A1B2", name: "Riley HealthCare LLC"},
     {internalId: "C3D4", name: "Quail Creek RE LLC"},
     {internalId: "E5F6", name: "William James Group LLC"},
@@ -101,22 +103,22 @@ function jaroWinklerDistance(s1: string, s2: string): number {
  * @param threshold - The minimum similarity score required (default: 0.8)
  * @returns The internalId of the closest match, or null if no match is found within threshold
  */
-export function findIdByFuzzyName(companyName: string, threshold: number = 0.8): string | null {
+export function findIdByFuzzyName(companyName: string, threshold: number = 0.8): InsuranceMatch | null {
     if (!companyName) return null;
 
     const searchName = companyName.toLowerCase();
-    let bestMatch: { id: string; score: number } | null = null;
+    let bestMatch: InsuranceMatch | null = null;
 
     for (const insured of INSUREDS) {
         const score = jaroWinklerDistance(searchName, insured.name.toLowerCase());
         
         if (score >= threshold) {
             if (!bestMatch || score > bestMatch.score) {
-                bestMatch = { id: insured.internalId, score };
+                bestMatch = { insured, score };
             }
         }
     }
 
-    return bestMatch?.id || null;
+    return bestMatch;
 }
 

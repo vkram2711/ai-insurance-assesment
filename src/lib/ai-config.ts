@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import yaml from 'js-yaml';
 import OpenAI from 'openai';
+import { AIError, NetworkError } from '@/types/errors';
 
 interface AIConfig {
     metadata: {
@@ -29,14 +30,30 @@ export class AiConfig {
 
     constructor() {
         // Initialize OpenAI client
+        if (!process.env.OPENAI_API_KEY) {
+            throw new AIError('OPENAI_API_KEY environment variable is not set');
+        }
+
         this.openai = new OpenAI({
             apiKey: process.env.OPENAI_API_KEY
         });
 
         // Load and parse the aiconfig.yaml file
         const configPath = path.join(process.cwd(), 'aiconfig.yaml');
+        if (!fs.existsSync(configPath)) {
+            throw new AIError('aiconfig.yaml file not found');
+        }
+
         const configContent = fs.readFileSync(configPath, 'utf8');
         this.config = yaml.load(configContent) as AIConfig;
+
+        // Validate config structure
+        if (!this.config.metadata?.model) {
+            throw new AIError('Invalid config: missing model in metadata');
+        }
+        if (!this.config.prompts?.length) {
+            throw new AIError('Invalid config: no prompts defined');
+        }
     }
 
     /**
@@ -73,7 +90,7 @@ Required fields: ${output_schema.required.join(', ')}`;
     async createChatCompletion(promptName: string, variables: Record<string, string>) {
         const promptConfig = this.config.prompts.find(p => p.name === promptName);
         if (!promptConfig) {
-            throw new Error(`Prompt "${promptName}" not found in configuration`);
+            throw new AIError(`Prompt "${promptName}" not found in configuration`);
         }
 
         // Replace variables in the prompt template

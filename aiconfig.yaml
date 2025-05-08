@@ -2,7 +2,7 @@ name: insurance-document-processor
 description: Configuration for processing insurance documents using OpenAI
 schema_version: v1
 metadata:
-  model: gpt-4.1-mini-2025-04-14
+  model: xyz
   temperature: 0.0
   response_format: { type: "json_object" }
 

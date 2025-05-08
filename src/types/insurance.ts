@@ -6,3 +6,8 @@ export interface Insured {
   internalId: string;
   name: string;
 }
+
+export interface InsuranceMatch{
+  insured: Insured;
+  score: number;
+}

@@ -1,5 +1,6 @@
 import {PrimaryInsured} from '@/types/insurance';
 import { AiConfig } from './ai-config';
+import { AIError, TokenLimitError, NetworkError } from '@/types/errors';
 
 // Create a singleton instance of AiConfig
 const openAIConfig = new AiConfig();
@@ -10,19 +11,22 @@ const openAIConfig = new AiConfig();
  * @returns Promise<PrimaryInsured> Object containing primary insured information
  */
 export async function extractPrimaryInsured(pdfText: string): Promise<PrimaryInsured> {
-    try {
-        // Create chat completion using the configuration
-        const response = await openAIConfig.createChatCompletion('extract_primary_insured', {
-            pdf_text: pdfText
-        });
+    // Create chat completion using the configuration
+    const response = await openAIConfig.createChatCompletion('extract_primary_insured', {
+        pdf_text: pdfText
+    });
 
-        const parsedResult = JSON.parse(response.choices[0].message.content || '{}');
-
-        return {
-            name: parsedResult.name || ''
-        };
-    } catch (error) {
-        console.error('Error extracting primary insured information:', error);
-        throw new Error('Failed to extract primary insured information');
+    const content = response.choices[0].message.content;
+    if (!content) {
+        throw new AIError('No response content received from LLM');
     }
+
+    const parsedResult = JSON.parse(content);
+    if (!parsedResult.name) {
+        throw new AIError('Could not find insured name in the document');
+    }
+
+    return {
+        name: parsedResult.name
+    };
 }

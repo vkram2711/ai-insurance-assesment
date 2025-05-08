@@ -3,47 +3,37 @@ import { parsePdf } from "@/lib/parser";
 import { extractPrimaryInsured } from "@/lib/llm";
 import {PrimaryInsured} from "@/types/insurance";
 import {findIdByFuzzyName} from "@/lib/match";
+import { ValidationError, ErrorHandler } from '@/types/errors';
 
 export const runtime = 'nodejs'
 
 export async function POST(req: NextRequest) {
-    const formData = await req.formData()
-    const file = formData.get('file') as File
-
-    if (!file) {
-        return NextResponse.json(
-            { error: 'No file uploaded' },
-            { status: 400 }
-        )
-    }
-
-    if (!file.type.includes('pdf')) {
-        return NextResponse.json(
-            { error: 'File must be a PDF' },
-            { status: 400 }
-        )
-    }
-
     try {
+        const formData = await req.formData()
+        const file = formData.get('file') as File
+
+        if (!file) {
+            throw new ValidationError('No file uploaded')
+        }
+
+        if (!file.type.includes('pdf')) {
+            throw new ValidationError('File must be a PDF')
+        }
+
         const arrayBuffer = await file.arrayBuffer()
         const buffer = Buffer.from(arrayBuffer)
+        
+        // Parse PDF and extract information
         const text = await parsePdf(buffer)
+        const primaryInsured = await extractPrimaryInsured(text)
+        const insuranceMatch = await findIdByFuzzyName(primaryInsured.name)
 
-        // Extract primary insured information
-        const primaryInsured: PrimaryInsured = await extractPrimaryInsured(text)
-        const insuredId = findIdByFuzzyName(primaryInsured.name)
         return NextResponse.json({
             text,
-            insuredId,
-            primaryInsured,
+            insuranceMatch,
         })
-    } catch (err: any) {
-        return NextResponse.json(
-            {
-                error: 'Failed to process PDF',
-                details: err.message || err.toString(),
-            },
-            { status: 500 }
-        )
+    } catch (error) {
+        const { message, statusCode } = ErrorHandler.handle(error)
+        return NextResponse.json({ error: message }, { status: statusCode })
     }
 }
