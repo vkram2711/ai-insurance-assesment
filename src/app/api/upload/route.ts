@@ -5,7 +5,6 @@ import {parsePdf} from "@/lib/parser";
 export const runtime = 'nodejs'
 
 
-
 export async function POST(req: NextRequest) {
     const formData = await req.formData()
     const file = formData.get('file') as File
@@ -21,7 +20,6 @@ export async function POST(req: NextRequest) {
     try {
         const arrayBuffer = await file.arrayBuffer()
         const buffer = Buffer.from(arrayBuffer)
-
         const text = await parsePdf(buffer)
 
         return NextResponse.json({ text })

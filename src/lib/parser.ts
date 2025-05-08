@@ -7,9 +7,6 @@ export function parsePdf(buffer: Buffer): Promise<string> {
         parser.on('pdfParser_dataError', err => reject(err.parserError))
         parser.on('pdfParser_dataReady', pdfData => {
             try {
-                // Debug the structure
-                console.log('PDF Data Structure:', JSON.stringify(pdfData, null, 2))
-
                 // Get the raw text content first
                 const rawText = parser.getRawTextContent()
 
@@ -17,8 +14,7 @@ export function parsePdf(buffer: Buffer): Promise<string> {
                 const text = pdfData?.Pages?.map(page => {
                     const pageTexts = page.Texts || []
                     return pageTexts.map(t => {
-                        const decodedText = decodeURIComponent(t.R.map(r => r.T).join(''))
-                        return decodedText
+                        return decodeURIComponent(t.R.map(r => r.T).join(''))
                     }).join('\n')
                 }).join('\n') || ''
 
