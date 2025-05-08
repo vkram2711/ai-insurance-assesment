@@ -116,4 +116,41 @@ Required fields: ${output_schema.required.join(', ')}`;
             ]
         });
     }
+
+    /**
+     * Creates a streaming chat completion request based on the prompt name and input variables
+     * @param promptName Name of the prompt in the config file
+     * @param variables Object containing variables to replace in the prompt template
+     * @returns The streaming chat completion request
+     */
+    async createStreamingChatCompletion(promptName: string, variables: Record<string, string>) {
+        const promptConfig = this.config.prompts.find(p => p.name === promptName);
+        if (!promptConfig) {
+            throw new AIError(`Prompt "${promptName}" not found in configuration`);
+        }
+
+        // Replace variables in the prompt template
+        let prompt = promptConfig.input;
+        Object.entries(variables).forEach(([key, value]) => {
+            prompt = prompt.replace(`{{${key}}}`, value);
+        });
+
+        // Create the streaming chat completion request
+        return this.openai.chat.completions.create({
+            model: this.config.metadata.model,
+            temperature: this.config.metadata.temperature,
+            response_format: {type: "json_object"},
+            messages: [
+                {
+                    role: 'system',
+                    content: this.buildSystemPrompt(promptConfig)
+                },
+                {
+                    role: 'user',
+                    content: prompt
+                }
+            ],
+            stream: true
+        });
+    }
 } 

@@ -46,9 +46,26 @@ export default function HomePage() {
                             case 'progress':
                                 setProcessingSteps(prev => [...prev, data.message])
                                 break
+                            case 'llm_update':
+                                setProcessingSteps(prev => {
+                                    const newSteps = [...prev];
+                                    // Find the last LLM update or add a new one
+                                    const lastLLMIndex = newSteps.findIndex(step => step.startsWith('LLM is processing:'));
+                                    if (lastLLMIndex !== -1) {
+                                        newSteps[lastLLMIndex] = `LLM is processing: ${data.message}`;
+                                    } else {
+                                        newSteps.push(`LLM is processing: ${data.message}`);
+                                    }
+                                    return newSteps;
+                                });
+                                break;
                             case 'result':
-                                setText(data.data.text)
-                                setInsuranceMatch(data.data.insuranceMatch)
+                                if (data.data.text) {
+                                    setText(data.data.text);
+                                }
+                                if (data.data.insuranceMatch) {
+                                    setInsuranceMatch(data.data.insuranceMatch);
+                                }
                                 break
                             case 'error':
                                 throw new Error(data.error)

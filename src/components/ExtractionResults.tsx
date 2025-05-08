@@ -33,12 +33,16 @@ export default function ExtractionResults({
             <div className="space-y-4">
                 {processingSteps.map((step, index) => (
                     <div key={index} className="space-y-2">
-                        <div className="text-sm text-gray-700">
+                        <div className={`text-sm ${
+                            step.startsWith('LLM is processing:') 
+                                ? 'bg-blue-50 p-3 rounded border border-blue-100 text-blue-700 font-mono'
+                                : 'text-gray-700'
+                        }`}>
                             {step}
                         </div>
                         {/* Show extracted text right after parsing step */}
                         {step.includes('Parsing PDF') && text && (
-                            <div className="ml-4 bg-gray-50 p-3 rounded text-sm text-gray-700 whitespace-pre-wrap">
+                            <div className="bg-gray-50 p-3 rounded text-sm text-gray-700 whitespace-pre-wrap">
                                 {text}
                             </div>
                         )}

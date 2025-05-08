@@ -1,7 +1,6 @@
-import {NextRequest, NextResponse} from 'next/server'
+import {NextRequest} from 'next/server'
 import {parsePdf} from "@/lib/parser";
-import {extractPrimaryInsured} from "@/lib/llm";
-import {PrimaryInsured} from "@/types/insurance";
+import {streamExtractPrimaryInsured} from "@/lib/llm";
 import {findIdByFuzzyName} from "@/lib/match";
 import {ValidationError, ErrorHandler} from '@/types/errors';
 
@@ -14,6 +13,10 @@ export async function POST(req: NextRequest) {
 
     const sendProgress = async (message: string) => {
         await writer.write(encoder.encode(`data: ${JSON.stringify({type: 'progress', message})}\n\n`));
+    };
+
+    const sendLLMUpdate = async (message: string) => {
+        await writer.write(encoder.encode(`data: ${JSON.stringify({type: 'llm_update', message})}\n\n`));
     };
 
     const sendResult = async (data: any) => {
@@ -44,16 +47,20 @@ export async function POST(req: NextRequest) {
 
             await sendProgress('Parsing PDF...');
             const text = await parsePdf(buffer)
+            await sendResult({ text: text });
 
             await sendProgress('Extracting primary insured information...');
-            const primaryInsured = await extractPrimaryInsured(text)
+            let llmOutput = '';
+            const primaryInsured = await streamExtractPrimaryInsured(text, (chunk) => {
+                llmOutput += chunk;
+                sendLLMUpdate(llmOutput);
+            });
 
             await sendProgress('Finding insurance match...');
             const insuranceMatch = await findIdByFuzzyName(primaryInsured.name)
 
             await sendProgress('Processing complete!');
             await sendResult({
-                text,
                 insuranceMatch,
             });
             await writer.close();
