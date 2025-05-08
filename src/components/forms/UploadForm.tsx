@@ -78,6 +78,14 @@ export default function UploadForm({ onUpload, isProcessing = false, fileResults
         })
     }
 
+    const collapseAll = () => {
+        setExpandedFiles(new Set())
+    }
+
+    const expandAll = () => {
+        setExpandedFiles(new Set(files.map((_, index) => index)))
+    }
+
     return (
         <div className="w-full space-y-4">
             <div 
@@ -130,6 +138,20 @@ export default function UploadForm({ onUpload, isProcessing = false, fileResults
 
             {files.length > 0 && (
                 <div className="space-y-4">
+                    <div className="flex justify-end space-x-2">
+                        <button
+                            onClick={expandAll}
+                            className="px-3 py-1 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white"
+                        >
+                            Expand All
+                        </button>
+                        <button
+                            onClick={collapseAll}
+                            className="px-3 py-1 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white"
+                        >
+                            Collapse All
+                        </button>
+                    </div>
                     <div className="bg-gray-50 dark:bg-gray-800 rounded-md divide-y divide-gray-200 dark:divide-gray-700">
                         {files.map((file, index) => {
                             const result = fileResults[index]
@@ -161,14 +183,31 @@ export default function UploadForm({ onUpload, isProcessing = false, fileResults
                                                 />
                                             </div>
                                         </div>
-                                        <button
-                                            onClick={() => removeFile(index)}
-                                            className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-                                        >
-                                            <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                                            </svg>
-                                        </button>
+                                        <div className="flex items-center space-x-4">
+                                            {!isExpanded && result && (
+                                                <div className="text-sm text-gray-500 dark:text-gray-400">
+                                                    {result.error ? (
+                                                        <span className="text-red-600 dark:text-red-400">{result.error}</span>
+                                                    ) : result.insuranceMatch ? (
+                                                        <span className="text-green-600 dark:text-green-400">
+                                                            Match: {result.insuranceMatch.insured.name} ({Math.round(result.insuranceMatch.score * 100)}%)
+                                                        </span>
+                                                    ) : result.processingSteps.length > 0 ? (
+                                                        <span className="text-blue-600 dark:text-blue-400">
+                                                            {result.processingSteps[result.processingSteps.length - 1]}
+                                                        </span>
+                                                    ) : null}
+                                                </div>
+                                            )}
+                                            <button
+                                                onClick={() => removeFile(index)}
+                                                className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                                            >
+                                                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                </svg>
+                                            </button>
+                                        </div>
                                     </div>
                                     {isExpanded && result && (
                                         <div className="p-4 bg-white dark:bg-gray-800">
