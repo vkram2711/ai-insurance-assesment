@@ -9,7 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@types/js-yaml": "^4.0.9",
     "aiconfig": "^1.1.15",
+    "js-yaml": "^4.1.0",
     "next": "15.3.2",
     "openai": "^4.97.0",
     "pdf-parse": "^1.1.1",
@@ -19,13 +21,18 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.27.1",
+    "@babel/preset-env": "^7.27.2",
     "@eslint/eslintrc": "^3.3.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "babel-loader": "^10.0.0",
     "eslint": "^8.57.1",
     "eslint-config-next": "15.3.2",
+    "handlebars": "^4.7.8",
+    "handlebars-loader": "^1.7.3",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

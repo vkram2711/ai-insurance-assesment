@@ -1,4 +1,8 @@
 import {PrimaryInsured} from '@/types/insurance';
+import { AiConfig } from './ai-config';
+
+// Create a singleton instance of AiConfig
+const openAIConfig = new AiConfig();
 
 /**
  * Extracts primary insured information from PDF text using OpenAI's LLM
@@ -7,17 +11,12 @@ import {PrimaryInsured} from '@/types/insurance';
  */
 export async function extractPrimaryInsured(pdfText: string): Promise<PrimaryInsured> {
     try {
-        // Import aiconfig only on the server side
-        const { AIConfigRuntime } = await import('aiconfig');
-        const aiConfig = await AIConfigRuntime.load('aiconfig.yaml');
-
-        // Execute the prompt with the PDF text
-        const result = await aiConfig.runPrompt('extract_primary_insured', {
+        // Create chat completion using the configuration
+        const response = await openAIConfig.createChatCompletion('extract_primary_insured', {
             pdf_text: pdfText
         });
 
-        // Parse the result
-        const parsedResult = JSON.parse(result.output);
+        const parsedResult = JSON.parse(response.choices[0].message.content || '{}');
 
         return {
             name: parsedResult.name || ''
