@@ -1,9 +1,9 @@
-import PDFParser from 'pdf2json'
 import { NextRequest, NextResponse } from 'next/server'
-import {parsePdf} from "@/lib/parser";
+import { parsePdf } from "@/lib/parser";
+import { extractPrimaryInsured } from "@/lib/llm";
+import { PrimaryInsured } from "@/types/insurance";
 
 export const runtime = 'nodejs'
-
 
 export async function POST(req: NextRequest) {
     const formData = await req.formData()
@@ -21,11 +21,17 @@ export async function POST(req: NextRequest) {
         const arrayBuffer = await file.arrayBuffer()
         const buffer = Buffer.from(arrayBuffer)
         const text = await parsePdf(buffer)
-
-        return NextResponse.json({ text })
+        
+        // Extract primary insured information
+        const primaryInsured: PrimaryInsured = await extractPrimaryInsured(text)
+        
+        return NextResponse.json({ 
+            text,
+            primaryInsured
+        })
     } catch (err: any) {
         return NextResponse.json({
-            error: 'Failed to parse PDF',
+            error: 'Failed to process PDF',
             details: err.message || err.toString(),
         }, { status: 500 })
     }

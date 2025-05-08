@@ -1,0 +1,31 @@
+name: insurance-document-processor
+description: Configuration for processing insurance documents using OpenAI
+schema_version: v1
+metadata:
+  model: o4-mini-2025-04-16
+  temperature: 0.0
+  response_format: { type: "json_object" }
+
+prompts:
+  - name: extract_primary_insured
+    description: Extract primary insured information from insurance document text
+    input: |
+      Extract the primary insured information from the following insurance document text. 
+      Return the information in a structured format. If any information is not found, leave it as undefined.
+      
+      Text from document:
+      {{pdf_text}}
+      
+      Extract the following information:
+      - Full name of the primary insured
+
+    metadata:
+      system_prompt: "You are an AI assistant specialized in extracting structured information from insurance documents. Extract only the requested information and return it in a clear, structured format."
+      output_schema:
+        type: object
+        properties:
+          name:
+            type: string
+            description: "Full name of the primary insured"
+        required:
+          - name 
