@@ -1,7 +1,7 @@
 import {PrimaryInsured} from '@/types/insurance';
-import { AiConfig } from './ai-config';
-import { AIError, TokenLimitError, NetworkError } from '@/types/errors';
-import { estimateTokenCount, splitIntoChunks } from './text-utils';
+import {AiConfig} from './ai-config';
+import {AIError, TokenLimitError, NetworkError} from '@/types/errors';
+import {estimateTokenCount, splitIntoChunks} from './text-utils';
 
 // Create a singleton instance of AiConfig
 const openAIConfig = new AiConfig();
@@ -29,10 +29,10 @@ async function processChunk(
         // Estimate tokens in the chunk
         const chunkTokens = estimateTokenCount(chunk);
         const maxTokens = openAIConfig.getMaxTokens();
-        const reservedTokens = TOKEN_RESERVATION.SYSTEM_PROMPT + 
-                             TOKEN_RESERVATION.RESPONSE + 
-                             TOKEN_RESERVATION.BUFFER;
-        
+        const reservedTokens = TOKEN_RESERVATION.SYSTEM_PROMPT +
+            TOKEN_RESERVATION.RESPONSE +
+            TOKEN_RESERVATION.BUFFER;
+
         if (chunkTokens > maxTokens - reservedTokens) {
             throw new TokenLimitError(`Chunk exceeds token limit: ${chunkTokens} tokens`);
         }
@@ -60,7 +60,7 @@ async function processChunk(
                 if (!parsedResult.name) {
                     throw new AIError('No name found in LLM response');
                 }
-                return { name: parsedResult.name };
+                return {name: parsedResult.name};
             } catch (error) {
                 const parseError = error as Error;
                 throw new AIError(`Failed to parse LLM response: ${parseError.message}`);
@@ -80,7 +80,7 @@ async function processChunk(
                 if (!parsedResult.name) {
                     throw new AIError('No name found in LLM response');
                 }
-                return { name: parsedResult.name };
+                return {name: parsedResult.name};
             } catch (error) {
                 const parseError = error as Error;
                 throw new AIError(`Failed to parse LLM response: ${parseError.message}`);
@@ -89,7 +89,7 @@ async function processChunk(
     } catch (error) {
         // Log the error for debugging
         console.error('Error processing chunk:', error);
-        
+
         // Re-throw the error to be handled by the caller
         if (error instanceof AIError) {
             throw error;
@@ -114,14 +114,14 @@ async function processPrimaryInsuredExtraction(
     try {
         // Get max tokens from config and reserve tokens for system prompt and response
         const maxTokens = openAIConfig.getMaxTokens();
-        const reservedTokens = TOKEN_RESERVATION.SYSTEM_PROMPT + 
-                             TOKEN_RESERVATION.RESPONSE + 
-                             TOKEN_RESERVATION.BUFFER;
+        const reservedTokens = TOKEN_RESERVATION.SYSTEM_PROMPT +
+            TOKEN_RESERVATION.RESPONSE +
+            TOKEN_RESERVATION.BUFFER;
         const availableTokens = maxTokens - reservedTokens;
 
         // Split text into chunks
         const chunks = splitIntoChunks(pdfText, availableTokens);
-        
+
         if (chunks.length === 0) {
             throw new AIError('No valid text chunks to process');
         }
@@ -129,7 +129,7 @@ async function processPrimaryInsuredExtraction(
         if (options.isStreaming) {
             options.onProgress?.(`Processing document in ${chunks.length} chunks...`);
         }
-        
+
         // Process each chunk and collect results
         let lastError: Error | null = null;
         for (let i = 0; i < chunks.length; i++) {
@@ -169,7 +169,7 @@ async function processPrimaryInsuredExtraction(
  * @returns Promise<PrimaryInsured> Object containing primary insured information
  */
 export async function extractPrimaryInsured(pdfText: string): Promise<PrimaryInsured> {
-    return processPrimaryInsuredExtraction(pdfText, { isStreaming: false });
+    return processPrimaryInsuredExtraction(pdfText, {isStreaming: false});
 }
 
 /**
@@ -182,7 +182,7 @@ export async function streamExtractPrimaryInsured(
     pdfText: string,
     onProgress: (chunk: string) => void
 ): Promise<PrimaryInsured> {
-    return processPrimaryInsuredExtraction(pdfText, { 
+    return processPrimaryInsuredExtraction(pdfText, {
         isStreaming: true,
         onProgress
     });

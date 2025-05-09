@@ -1,14 +1,14 @@
 export interface PrimaryInsured {
-  name: string;
+    name: string;
 }
 
 export interface Insured {
-  internalId: string;
-  name: string;
+    internalId: string;
+    name: string;
 }
 
 export interface InsuranceMatch {
-  insured: Insured;
-  score: number;
-  isManual?: boolean;
+    insured: Insured;
+    score: number;
+    isManual?: boolean;
 }

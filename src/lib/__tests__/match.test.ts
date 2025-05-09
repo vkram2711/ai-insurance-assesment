@@ -1,5 +1,5 @@
-import { findIdByFuzzyName, jaroWinklerDistance } from '../match';
-import { InsuranceMatch } from '@/types/insurance';
+import {findIdByFuzzyName, jaroWinklerDistance} from '../match';
+import {InsuranceMatch} from '@/types/insurance';
 
 describe('String Matching Algorithm', () => {
     describe('jaroWinklerDistance', () => {

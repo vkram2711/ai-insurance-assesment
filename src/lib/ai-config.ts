@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import yaml from 'js-yaml';
 import OpenAI from 'openai';
-import { AIError, NetworkError } from '@/types/errors';
+import {AIError, NetworkError} from '@/types/errors';
 
 interface AIConfig {
     metadata: {

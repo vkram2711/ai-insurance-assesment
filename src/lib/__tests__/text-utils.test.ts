@@ -1,4 +1,4 @@
-import { estimateTokenCount, splitIntoChunks } from '../text-utils';
+import {estimateTokenCount, splitIntoChunks} from '../text-utils';
 
 describe('Token Management Utilities', () => {
     describe('estimateTokenCount', () => {
@@ -11,7 +11,7 @@ describe('Token Management Utilities', () => {
         });
 
         it('should handle special characters and spaces', () => {
-            expect(estimateTokenCount('hello, world!')).toBe(4); // 13 chars ≈ 4 tokens
+            expect(estimateTokenCount('hello, world!')).ztoBe(4); // 13 chars ≈ 4 tokens
             expect(estimateTokenCount('hello\nworld')).toBe(3); // 11 chars ≈ 3 tokens
             expect(estimateTokenCount('hello\tworld')).toBe(3); // 11 chars ≈ 3 tokens
         });
@@ -41,12 +41,12 @@ Second paragraph that is also quite long and should be split into multiple chunk
 
 Third paragraph that continues the pattern of being long enough to require splitting.`;
             const chunks = splitIntoChunks(text, 20);
-            
+
             // Verify each chunk is within token limit
             chunks.forEach(chunk => {
                 expect(estimateTokenCount(chunk)).toBeLessThanOrEqual(20);
             });
-            
+
             // Verify content is preserved
             const reconstructed = chunks.join('\n\n');
             expect(reconstructed.replace(/\s+/g, ' ')).toBe(text.replace(/\s+/g, ' '));
@@ -55,12 +55,12 @@ Third paragraph that continues the pattern of being long enough to require split
         it('should split long text into sentences when appropriate', () => {
             const text = 'This is a very long first sentence that should be split. This is another long sentence that needs splitting. And here is the final sentence.';
             const chunks = splitIntoChunks(text, 15);
-            
+
             // Verify each chunk is within token limit
             chunks.forEach(chunk => {
                 expect(estimateTokenCount(chunk)).toBeLessThanOrEqual(15);
             });
-            
+
             // Verify content is preserved
             expect(chunks.join(' ')).toBe(text);
         });
@@ -68,15 +68,15 @@ Third paragraph that continues the pattern of being long enough to require split
         it('should split very long words when necessary', () => {
             const text = 'ThisIsAnExtremelyLongWordThatDefinitelyNeedsToBeSplitIntoMultipleChunks';
             const chunks = splitIntoChunks(text, 10);
-            
+
             // Should be split into multiple chunks
             expect(chunks.length).toBeGreaterThan(1);
-            
+
             // Each chunk should be within limit
             chunks.forEach(chunk => {
                 expect(estimateTokenCount(chunk)).toBeLessThanOrEqual(10);
             });
-            
+
             // Content should be preserved
             expect(chunks.join('')).toBe(text);
         });
@@ -84,7 +84,7 @@ Third paragraph that continues the pattern of being long enough to require split
         it('should maintain text integrity when splitting', () => {
             const text = 'First complete sentence. Second complete sentence. Third complete sentence.';
             const chunks = splitIntoChunks(text, 20);
-            
+
             // Each chunk should be a complete sentence or part
             chunks.forEach(chunk => {
                 // Should either be a complete sentence or a valid part
@@ -93,7 +93,7 @@ Third paragraph that continues the pattern of being long enough to require split
                     chunk.match(/^[A-Za-z]/) // Valid part
                 ).toBeTruthy();
             });
-            
+
             // Content should be preserved
             expect(chunks.join(' ')).toBe(text);
         });
@@ -105,12 +105,12 @@ This is a longer paragraph that needs to be split into multiple chunks because i
 
 Another short paragraph.`;
             const chunks = splitIntoChunks(text, 40);
-            
+
             // Verify chunks are properly split and within limits
             chunks.forEach(chunk => {
                 expect(estimateTokenCount(chunk)).toBeLessThanOrEqual(40);
             });
-            
+
             // Verify content is preserved
             const reconstructed = chunks.join('\n\n');
             expect(reconstructed.replace(/\s+/g, ' ')).toBe(text.replace(/\s+/g, ' '));
@@ -119,7 +119,7 @@ Another short paragraph.`;
         it('should handle edge cases', () => {
             // Single character
             expect(splitIntoChunks('a', 1)).toEqual(['a']);
-            
+
             // Very small token limit
             const text = 'Hello world';
             const chunks = splitIntoChunks(text, 2);
@@ -127,7 +127,7 @@ Another short paragraph.`;
                 expect(estimateTokenCount(chunk)).toBeLessThanOrEqual(2);
             });
             expect(chunks.join(' ')).toBe(text);
-            
+
             // Special characters
             const specialChars = '!@#$%^&*()';
             const chunks2 = splitIntoChunks(specialChars, 2);
@@ -156,16 +156,16 @@ Deductible: $1,000
 ADDITIONAL INFORMATION
 This policy provides coverage for the primary residence located at the above address.
 All terms and conditions are subject to the policy provisions.`;
-            
+
             const chunks = splitIntoChunks(insuranceText, 50);
-            
+
             // Verify chunks are properly split
             chunks.forEach(chunk => {
                 expect(estimateTokenCount(chunk)).toBeLessThanOrEqual(50);
                 // Verify each chunk starts with a section header or meaningful content
                 expect(chunk).toMatch(/^(POLICY|PRIMARY|COVERAGE|ADDITIONAL|Name:|Address:|Phone:|Type:|Coverage|Deductible:|This|All)/);
             });
-            
+
             // Verify content is preserved
             const reconstructed = chunks.join('\n\n');
             expect(reconstructed.replace(/\s+/g, ' ')).toBe(insuranceText.replace(/\s+/g, ' '));

@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
             await sendProgress(`Parsing ${file.type === FILE_TYPES.PDF ? 'PDF' : file.type === FILE_TYPES.TXT ? 'TXT' : 'DOCX'}...`);
             const text = await parseDocument(buffer, file.type as FileType)
             await sendProgress('Text extraction complete');
-            await sendResult({ type: 'extracted_text', text: text });
+            await sendResult({type: 'extracted_text', text: text});
 
             await sendProgress('Extracting primary insured information...');
             let llmOutput = '';

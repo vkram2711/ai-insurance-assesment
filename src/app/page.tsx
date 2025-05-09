@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import {useState} from 'react'
 import UploadForm from '@/components/forms/UploadForm'
-import { InsuranceMatch, Insured } from '@/types/insurance'
+import {InsuranceMatch, Insured} from '@/types/insurance'
 
 interface FileResult {
     fileName: string;
@@ -46,7 +46,7 @@ export default function HomePage() {
                 if (!reader) throw new Error('Failed to start processing')
 
                 while (true) {
-                    const { done, value } = await reader.read()
+                    const {done, value} = await reader.read()
                     if (done) break
 
                     const chunk = new TextDecoder().decode(value)
@@ -55,18 +55,18 @@ export default function HomePage() {
                     for (const line of lines) {
                         if (line.startsWith('data: ')) {
                             const data = JSON.parse(line.slice(6))
-                            
+
                             setFileResults(prev => {
                                 const newResults = [...prev]
-                                const currentResult = { ...newResults[i] }
+                                const currentResult = {...newResults[i]}
 
                                 switch (data.type) {
                                     case 'progress':
                                         currentResult.processingSteps = [...currentResult.processingSteps, data.message]
                                         break
                                     case 'llm_update':
-                                        currentResult.processingSteps = currentResult.processingSteps.map(step => 
-                                            step.startsWith('LLM is processing:') 
+                                        currentResult.processingSteps = currentResult.processingSteps.map(step =>
+                                            step.startsWith('LLM is processing:')
                                                 ? `LLM is processing: ${data.message}`
                                                 : step
                                         )
@@ -129,10 +129,10 @@ export default function HomePage() {
     return (
         <main className="min-h-screen flex flex-col items-center justify-center p-6">
             <h1 className="text-3xl font-bold mb-8">PDF Upload and Parse</h1>
-            
+
             <div className="w-full max-w-4xl">
-                <UploadForm 
-                    onUpload={handleUpload} 
+                <UploadForm
+                    onUpload={handleUpload}
                     onRemoveFile={handleRemoveFile}
                     onManualSelect={handleManualSelect}
                     isProcessing={isProcessing}

@@ -111,10 +111,10 @@ export function findIdByFuzzyName(companyName: string, threshold: number = 0.8):
 
     for (const insured of INSUREDS) {
         const score = jaroWinklerDistance(searchName, insured.name.toLowerCase());
-        
+
         if (score >= threshold) {
             if (!bestMatch || score > bestMatch.score) {
-                bestMatch = { insured, score };
+                bestMatch = {insured, score};
             }
         }
     }
