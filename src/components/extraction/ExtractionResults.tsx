@@ -1,8 +1,8 @@
 import { InsuranceMatch, Insured } from '@/types/insurance'
-import ProcessingSteps from './extraction/ProcessingSteps'
-import ErrorDisplay from './extraction/ErrorDisplay'
-import InsuranceMatchDisplay from './extraction/InsuranceMatchDisplay'
-import ManualSelection from './extraction/ManualSelection'
+import ProcessingSteps from './ProcessingSteps'
+import ErrorDisplay from './ErrorDisplay'
+import InsuranceMatchDisplay from './InsuranceMatchDisplay'
+import ManualSelection from './ManualSelection'
 
 interface ExtractionResultsProps {
     text: string | null

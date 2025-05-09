@@ -2,7 +2,7 @@
 
 import { FileListItemProps } from '@/types/upload'
 import FileStatus from '@/components/FileStatus'
-import ExtractionResults from '@/components/ExtractionResults'
+import ExtractionResults from '@/components/extraction/ExtractionResults'
 
 export default function FileListItem({
     file,
