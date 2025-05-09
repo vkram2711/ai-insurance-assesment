@@ -93,8 +93,17 @@ export function useFileProcessing() {
                                         break
                                     case 'error':
                                         if (data.error === "Could not find selector name in the document") {
-                                            // Instead of setting error, we'll just continue to show manual selection
-                                            currentResult.processingSteps = [...currentResult.processingSteps, "Automatic name detection failed - please select manually"]
+                                            // Keep the LLM output visible and add the manual selection message
+                                            const llmSteps = currentResult.processingSteps.filter(step => 
+                                                step.startsWith('LLM is processing:')
+                                            )
+                                            currentResult.processingSteps = [
+                                                ...currentResult.processingSteps.filter(step => 
+                                                    !step.startsWith('LLM is processing:')
+                                                ),
+                                                ...llmSteps,
+                                                "Automatic name detection failed - please select manually"
+                                            ]
                                         } else {
                                             currentResult.error = data.error
                                         }

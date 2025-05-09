@@ -57,6 +57,7 @@ AI related settings are stored in aiconfig.yml (model, token limit, prompts, etc
 - May require additional processing for complex layouts, especially with PDF
 - GPT usually fixes some of the formatting issues or misspellings when it comes to names which works well but may create problems on really large set of insureds
 - The application is designed using Server-Sent Events (SSE) for event streaming which requires keeping open http connections and may not scale well
+- If there is insured with name "undefined" it will certainly be a problem
 
 
 ## Testing
