@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { InsuranceMatch, Insured } from '@/types/insurance'
 import ExtractionResults from '@/components/ExtractionResults'
 import FileStatus from '@/components/FileStatus'
@@ -26,6 +26,18 @@ export default function UploadForm({ onUpload, onRemoveFile, onManualSelect, isP
     const [files, setFiles] = useState<File[]>([])
     const [isDragging, setIsDragging] = useState(false)
     const [expandedFiles, setExpandedFiles] = useState<Set<number>>(new Set())
+
+    useEffect(() => {
+        if (fileResults.length === 0) {
+            setFiles([])
+            setExpandedFiles(new Set())
+            // Reset the file input
+            const fileInput = document.getElementById('file-upload') as HTMLInputElement
+            if (fileInput) {
+                fileInput.value = ''
+            }
+        }
+    }, [fileResults])
 
     const handleUpload = async () => {
         if (files.length === 0) return
@@ -70,6 +82,11 @@ export default function UploadForm({ onUpload, onRemoveFile, onManualSelect, isP
             return newSet
         })
         onRemoveFile?.(index)
+        // Reset the file input when removing files
+        const fileInput = document.getElementById('file-upload') as HTMLInputElement
+        if (fileInput) {
+            fileInput.value = ''
+        }
     }
 
     const toggleExpand = (index: number) => {
