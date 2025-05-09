@@ -9,6 +9,7 @@ interface ProcessingStepsProps {
 export default function ProcessingSteps({ steps, text }: ProcessingStepsProps) {
     const [llmSteps, setLlmSteps] = useState<string[]>([])
     const [llmResponse, setLlmResponse] = useState<any>(null)
+    const [streamingText, setStreamingText] = useState<string>('')
 
     // Handle LLM processing steps
     useEffect(() => {
@@ -35,6 +36,9 @@ export default function ProcessingSteps({ steps, text }: ProcessingStepsProps) {
                     return [...prev, newStep]
                 })
 
+                // Update streaming text
+                setStreamingText(jsonStr)
+
                 // Try to parse JSON, but don't fail if it's incomplete
                 try {
                     // Check if the JSON string is complete
@@ -44,7 +48,6 @@ export default function ProcessingSteps({ steps, text }: ProcessingStepsProps) {
                     }
                 } catch (error) {
                     // Silently ignore JSON parsing errors during streaming
-                    console.debug('Incomplete JSON during streaming:', error)
                 }
             }
         }
@@ -96,7 +99,12 @@ export default function ProcessingSteps({ steps, text }: ProcessingStepsProps) {
                             : 'text-gray-700 dark:text-gray-300'
                     }`}>
                         {step.startsWith('LLM is processing:') 
-                            ? <LLMProcessing step={step} steps={llmSteps} response={llmResponse} />
+                            ? <LLMProcessing 
+                                step={step} 
+                                steps={llmSteps} 
+                                response={llmResponse} 
+                                streamingText={streamingText}
+                              />
                             : formatProcessingStep(step)
                         }
                     </div>

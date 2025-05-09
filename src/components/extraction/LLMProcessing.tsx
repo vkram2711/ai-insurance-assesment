@@ -2,9 +2,10 @@ interface LLMProcessingProps {
     step: string
     steps: string[]
     response: any
+    streamingText: string
 }
 
-export default function LLMProcessing({ step, steps, response }: LLMProcessingProps) {
+export default function LLMProcessing({ step, steps, response, streamingText }: LLMProcessingProps) {
     if (!step.startsWith('LLM is processing:')) return null
 
     return (
@@ -25,10 +26,19 @@ export default function LLMProcessing({ step, steps, response }: LLMProcessingPr
                     </div>
                 </div>
             </div>
+            {streamingText && (
+                <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded text-sm text-gray-700 dark:text-gray-300 overflow-x-auto">
+                    <div className="font-medium mb-1">LLM Response:</div>
+                    <pre className="whitespace-pre-wrap font-mono">{streamingText}</pre>
+                </div>
+            )}
             {response && (
-                <pre className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded text-sm text-gray-700 dark:text-gray-300 overflow-x-auto">
-                    {JSON.stringify(response, null, 2)}
-                </pre>
+                <div className="mt-2 flex items-center space-x-2 text-green-600 dark:text-green-400">
+                    <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="font-medium">Found: {response.name}</span>
+                </div>
             )}
         </div>
     )
