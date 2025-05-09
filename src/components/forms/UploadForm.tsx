@@ -1,19 +1,17 @@
 'use client'
 
-import { useState, useCallback } from 'react'
-import { UploadFormProps } from '@/types/upload'
-import { useFileUpload } from '@/hooks/useFileUpload'
-import { FileResult } from '@/types/upload'
+import {UploadFormProps} from '@/types/upload'
+import {useFileUpload} from '@/hooks/useFileUpload'
 import FileUploader from '@/components/file-upload/FileUploader'
 import FileList from '@/components/lists/FileList'
 
-export default function UploadForm({ 
-    onUpload, 
-    onRemoveFile, 
-    onManualSelect, 
-    isProcessing = false, 
-    fileResults 
-}: UploadFormProps) {
+export default function UploadForm({
+                                       onUpload,
+                                       onRemoveFile,
+                                       onManualSelect,
+                                       isProcessing = false,
+                                       fileResults
+                                   }: UploadFormProps) {
     const {
         files,
         isDragging,
@@ -51,7 +49,7 @@ export default function UploadForm({
                         onRemoveFile={handleRemoveFile}
                         onManualSelect={onManualSelect}
                     />
-                    <button 
+                    <button
                         onClick={() => handleUpload(onUpload)}
                         disabled={isProcessing}
                         className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
