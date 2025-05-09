@@ -8,6 +8,7 @@ interface AIConfig {
     metadata: {
         model: string;
         temperature: number;
+        max_tokens: number;
         response_format: { type: "json_object" };
     };
     prompts: Array<{
@@ -51,9 +52,20 @@ export class AiConfig {
         if (!this.config.metadata?.model) {
             throw new AIError('Invalid config: missing model in metadata');
         }
+        if (!this.config.metadata?.max_tokens) {
+            throw new AIError('Invalid config: missing max_tokens in metadata');
+        }
         if (!this.config.prompts?.length) {
             throw new AIError('Invalid config: no prompts defined');
         }
+    }
+
+    /**
+     * Gets the maximum number of tokens configured for the model
+     * @returns The maximum number of tokens
+     */
+    getMaxTokens(): number {
+        return this.config.metadata.max_tokens;
     }
 
     /**
@@ -103,6 +115,7 @@ Required fields: ${output_schema.required.join(', ')}`;
         return this.openai.chat.completions.create({
             model: this.config.metadata.model,
             temperature: this.config.metadata.temperature,
+            max_tokens: this.config.metadata.max_tokens,
             response_format: {type: "json_object"},
             messages: [
                 {
@@ -139,6 +152,7 @@ Required fields: ${output_schema.required.join(', ')}`;
         return this.openai.chat.completions.create({
             model: this.config.metadata.model,
             temperature: this.config.metadata.temperature,
+            max_tokens: this.config.metadata.max_tokens,
             response_format: {type: "json_object"},
             messages: [
                 {
