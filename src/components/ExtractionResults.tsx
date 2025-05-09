@@ -1,6 +1,6 @@
 import { InsuranceMatch, Insured } from '@/types/insurance'
 import MatchScore from './MatchScore'
-import InsuredSelector from './InsuredSelector'
+import InsuredSelector from '@/components/selector/InsuredSelector'
 import { useState, useEffect } from 'react'
 
 interface ExtractionResultsProps {

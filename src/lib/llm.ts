@@ -14,7 +14,7 @@ const TOKEN_RESERVATION = {
 };
 
 /**
- * Process a single chunk of text to extract primary insured information
+ * Process a single chunk of text to extract primary selector information
  * @param chunk The text chunk to process
  * @param isStreaming Whether to use streaming mode
  * @param onProgress Optional callback for streaming progress
@@ -99,10 +99,10 @@ async function processChunk(
 }
 
 /**
- * Core function that processes the extraction of primary insured information from PDF text
+ * Core function that processes the extraction of primary selector information from PDF text
  * @param pdfText The text content extracted from the PDF
  * @param options Configuration options for the extraction
- * @returns Promise<PrimaryInsured> Object containing primary insured information
+ * @returns Promise<PrimaryInsured> Object containing primary selector information
  */
 async function processPrimaryInsuredExtraction(
     pdfText: string,
@@ -149,7 +149,7 @@ async function processPrimaryInsuredExtraction(
         }
 
         // If we've processed all chunks and found nothing, throw the last error or a generic one
-        throw lastError || new AIError('Could not find insured name in the document');
+        throw lastError || new AIError('Could not find selector name in the document');
     } catch (error) {
         if (error instanceof Error) {
             if (error.message.includes('token')) {
@@ -164,19 +164,19 @@ async function processPrimaryInsuredExtraction(
 }
 
 /**
- * Extracts primary insured information from PDF text using OpenAI's LLM
+ * Extracts primary selector information from PDF text using OpenAI's LLM
  * @param pdfText The text content extracted from the PDF
- * @returns Promise<PrimaryInsured> Object containing primary insured information
+ * @returns Promise<PrimaryInsured> Object containing primary selector information
  */
 export async function extractPrimaryInsured(pdfText: string): Promise<PrimaryInsured> {
     return processPrimaryInsuredExtraction(pdfText, {isStreaming: false});
 }
 
 /**
- * Streams the extraction of primary insured information from PDF text using OpenAI's LLM
+ * Streams the extraction of primary selector information from PDF text using OpenAI's LLM
  * @param pdfText The text content extracted from the PDF
  * @param onProgress Callback function that receives progress updates
- * @returns Promise<PrimaryInsured> Object containing primary insured information
+ * @returns Promise<PrimaryInsured> Object containing primary selector information
  */
 export async function streamExtractPrimaryInsured(
     pdfText: string,

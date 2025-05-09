@@ -5,7 +5,7 @@ import { UploadFormProps } from '@/types/upload'
 import { useFileUpload } from '@/hooks/useFileUpload'
 import { FileResult } from '@/types/upload'
 import FileUploader from '@/components/file-upload/FileUploader'
-import FileList from '@/components/file-upload/FileList'
+import FileList from '@/components/lists/FileList'
 
 export default function UploadForm({ 
     onUpload, 

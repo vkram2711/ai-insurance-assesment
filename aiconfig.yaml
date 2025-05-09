@@ -9,7 +9,7 @@ metadata:
 
 prompts:
   - name: extract_primary_insured
-    description: Extract primary insured information from insurance document text
+    description: Extract primary selector information from insurance document text
     input: |
       Extract the primary insured information from the following insurance document text. 
       Return the information in a structured format. If any information is not found, leave it as undefined.
@@ -27,6 +27,6 @@ prompts:
         properties:
           name:
             type: string
-            description: "Full name of the primary insured"
+            description: "Full name of the primary selector"
         required:
           - name 

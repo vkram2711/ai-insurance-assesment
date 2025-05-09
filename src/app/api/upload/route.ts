@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
             await sendProgress('Text extraction complete');
             await sendResult({type: 'extracted_text', text: text});
 
-            await sendProgress('Extracting primary insured information...');
+            await sendProgress('Extracting primary selector information...');
             let llmOutput = '';
             const primaryInsured = await streamExtractPrimaryInsured(text, (chunk) => {
                 llmOutput += chunk;
