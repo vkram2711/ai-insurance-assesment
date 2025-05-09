@@ -89,7 +89,7 @@ export function useFileUpload({ onRemoveFile, fileResultsLength }: UseFileUpload
             if (fileInput) {
                 fileInput.value = ''
             }
-        }, 300) // Match this with the animation duration
+        }, 400) // Match this with the animation duration
     }
 
     const handleToggleExpand = (index: number) => {

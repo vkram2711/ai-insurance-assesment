@@ -13,22 +13,27 @@ module.exports = {
       },
       keyframes: {
         fadeIn: {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
+          '0%': { opacity: '0', transform: 'scale(0.98)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
         },
         slideIn: {
-          '0%': { transform: 'translateY(10px)', opacity: '0' },
-          '100%': { transform: 'translateY(0)', opacity: '1' },
+          '0%': { transform: 'translateY(20px) scale(0.98)', opacity: '0' },
+          '100%': { transform: 'translateY(0) scale(1)', opacity: '1' },
         },
         slideOut: {
-          '0%': { transform: 'translateY(0)', opacity: '1' },
-          '100%': { transform: 'translateY(-10px)', opacity: '0' },
+          '0%': { transform: 'translateY(0) scale(1)', opacity: '1' },
+          '100%': { transform: 'translateY(-20px) scale(0.98)', opacity: '0' },
         },
+        reposition: {
+          '0%': { transform: 'translateY(0)' },
+          '100%': { transform: 'translateY(0)' },
+        }
       },
       animation: {
-        fadeIn: 'fadeIn 0.3s ease-in-out',
-        slideIn: 'slideIn 0.3s ease-in-out',
-        slideOut: 'slideOut 0.3s ease-in-out',
+        fadeIn: 'fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+        slideIn: 'slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+        slideOut: 'slideOut 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+        reposition: 'reposition 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
       },
     },
   },

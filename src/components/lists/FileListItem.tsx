@@ -17,15 +17,15 @@ export default function FileListItem({
     const currentStep = result?.processingSteps?.length ? result.processingSteps[result.processingSteps.length - 1] : undefined
 
     return (
-        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+        <div className="divide-y divide-gray-200 dark:divide-gray-700 transition-all duration-400 ease-out">
             <div className="flex items-center justify-between p-4 animate-fadeIn">
                 <div className="flex items-center space-x-3">
                     <button
                         onClick={onToggleExpand}
-                        className={`text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors duration-200 ${hasResults ? '' : 'invisible'}`}
+                        className={`text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-all duration-200 ${hasResults ? '' : 'invisible'}`}
                     >
                         <svg 
-                            className={`h-5 w-5 transform transition-transform duration-300 ease-in-out ${isExpanded ? 'rotate-90' : ''}`}
+                            className={`h-5 w-5 transform transition-transform duration-300 ease-out ${isExpanded ? 'rotate-90' : ''}`}
                             viewBox="0 0 20 20" 
                             fill="currentColor"
                         >
@@ -44,7 +44,7 @@ export default function FileListItem({
                 </div>
                 <div className="flex items-center space-x-4">
                     {!isExpanded && result && (
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                        <div className="text-sm text-gray-500 dark:text-gray-400 transition-opacity duration-200">
                             {result.error ? (
                                 <span className="text-red-600 dark:text-red-400">{result.error}</span>
                             ) : result.insuranceMatch ? (
@@ -64,7 +64,7 @@ export default function FileListItem({
                     )}
                     <button
                         onClick={onRemoveFile}
-                        className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                        className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors duration-200"
                     >
                         <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -73,7 +73,7 @@ export default function FileListItem({
                 </div>
             </div>
             <div 
-                className={`grid transition-all duration-500 ease-in-out ${
+                className={`grid transition-all duration-400 ease-out ${
                     isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
                 }`}
             >

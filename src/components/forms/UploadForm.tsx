@@ -29,35 +29,39 @@ export default function UploadForm({
     })
 
     return (
-        <div className="w-full space-y-4">
-            <FileUploader
-                onFilesSelected={handleFilesSelected}
-                isDragging={isDragging}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-            />
+        <div className="w-full grid grid-rows-[auto_1fr] gap-4">
+            <div>
+                <FileUploader
+                    onFilesSelected={handleFilesSelected}
+                    isDragging={isDragging}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                />
+            </div>
 
-            {files.length > 0 && (
-                <>
-                    <FileList
-                        files={files}
-                        fileResults={fileResults}
-                        isProcessing={isProcessing}
-                        expandedFiles={expandedFiles}
-                        onToggleExpand={handleToggleExpand}
-                        onRemoveFile={handleRemoveFile}
-                        onManualSelect={onManualSelect}
-                    />
+            <div className={`grid grid-rows-[1fr_auto] gap-4 transition-all duration-400 ease-out ${
+                files.length > 0 ? 'opacity-100' : 'opacity-0'
+            }`}>
+                <FileList
+                    files={files}
+                    fileResults={fileResults}
+                    isProcessing={isProcessing}
+                    expandedFiles={expandedFiles}
+                    onToggleExpand={handleToggleExpand}
+                    onRemoveFile={handleRemoveFile}
+                    onManualSelect={onManualSelect}
+                />
+                <div className="transition-all duration-400 ease-out">
                     <button
                         onClick={() => handleUpload(onUpload)}
                         disabled={isProcessing}
-                        className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                     >
                         {isProcessing ? 'Processing...' : `Process ${files.length} file${files.length > 1 ? 's' : ''}`}
                     </button>
-                </>
-            )}
+                </div>
+            </div>
         </div>
     )
 }
