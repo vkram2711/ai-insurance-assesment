@@ -2,6 +2,7 @@
 
 import { FileListProps } from '@/types/upload'
 import FileListItem from '@/components/lists/FileListItem'
+import { useState } from 'react'
 
 export default function FileList({
     files,
@@ -12,12 +13,19 @@ export default function FileList({
     onRemoveFile,
     onManualSelect
 }: FileListProps) {
+    const [removingIndex, setRemovingIndex] = useState<number | null>(null)
+
     const expandAll = () => {
         files.forEach((_, index) => onToggleExpand(index))
     }
 
     const collapseAll = () => {
         expandedFiles.forEach(index => onToggleExpand(index))
+    }
+
+    const handleRemoveFile = (index: number) => {
+        setRemovingIndex(index)
+        onRemoveFile(index)
     }
 
     return (
@@ -38,16 +46,23 @@ export default function FileList({
             </div>
             <div className="bg-gray-50 dark:bg-gray-800 rounded-md divide-y divide-gray-200 dark:divide-gray-700">
                 {files.map((file, index) => (
-                    <FileListItem
+                    <div
                         key={index}
-                        file={file}
-                        result={fileResults[index]}
-                        isProcessing={isProcessing && index === fileResults.findIndex(r => r.fileName === file.name)}
-                        isExpanded={expandedFiles.has(index)}
-                        onToggleExpand={() => onToggleExpand(index)}
-                        onRemoveFile={() => onRemoveFile(index)}
-                        onManualSelect={onManualSelect ? (insured) => onManualSelect(index, insured) : undefined}
-                    />
+                        className={`transition-all duration-300 ease-in-out ${
+                            removingIndex === index ? 'animate-slideOut' : 'animate-slideIn'
+                        }`}
+                        style={{ animationDelay: `${index * 100}ms` }}
+                    >
+                        <FileListItem
+                            file={file}
+                            result={fileResults[index]}
+                            isProcessing={isProcessing && index === fileResults.findIndex(r => r.fileName === file.name)}
+                            isExpanded={expandedFiles.has(index)}
+                            onToggleExpand={() => onToggleExpand(index)}
+                            onRemoveFile={() => handleRemoveFile(index)}
+                            onManualSelect={onManualSelect ? (insured) => onManualSelect(index, insured) : undefined}
+                        />
+                    </div>
                 ))}
             </div>
         </div>

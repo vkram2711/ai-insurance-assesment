@@ -18,7 +18,7 @@ export default function FileListItem({
 
     return (
         <div className="divide-y divide-gray-200 dark:divide-gray-700">
-            <div className="flex items-center justify-between p-4">
+            <div className="flex items-center justify-between p-4 animate-fadeIn">
                 <div className="flex items-center space-x-3">
                     <button
                         onClick={onToggleExpand}

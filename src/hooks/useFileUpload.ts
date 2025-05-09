@@ -23,6 +23,7 @@ export function useFileUpload({ onRemoveFile, fileResultsLength }: UseFileUpload
     const [files, setFiles] = useState<File[]>([])
     const [isDragging, setIsDragging] = useState(false)
     const [expandedFiles, setExpandedFiles] = useState<Set<number>>(new Set())
+    const [removingIndex, setRemovingIndex] = useState<number | null>(null)
 
     useEffect(() => {
         if (fileResultsLength === 0) {
@@ -72,18 +73,23 @@ export function useFileUpload({ onRemoveFile, fileResultsLength }: UseFileUpload
     }
 
     const handleRemoveFile = (index: number) => {
-        setFiles(prev => prev.filter((_, i) => i !== index))
-        setExpandedFiles(prev => {
-            const newSet = new Set(prev)
-            newSet.delete(index)
-            return newSet
-        })
-        onRemoveFile?.(index)
-        // Reset the file input when removing files
-        const fileInput = document.getElementById('file-upload') as HTMLInputElement
-        if (fileInput) {
-            fileInput.value = ''
-        }
+        setRemovingIndex(index)
+        // Wait for animation to complete before removing the file
+        setTimeout(() => {
+            setFiles(prev => prev.filter((_, i) => i !== index))
+            setExpandedFiles(prev => {
+                const newSet = new Set(prev)
+                newSet.delete(index)
+                return newSet
+            })
+            onRemoveFile?.(index)
+            setRemovingIndex(null)
+            // Reset the file input when removing files
+            const fileInput = document.getElementById('file-upload') as HTMLInputElement
+            if (fileInput) {
+                fileInput.value = ''
+            }
+        }, 300) // Match this with the animation duration
     }
 
     const handleToggleExpand = (index: number) => {
