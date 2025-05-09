@@ -10,10 +10,24 @@ export default function ProcessingSteps({ steps, text }: ProcessingStepsProps) {
     const [llmSteps, setLlmSteps] = useState<string[]>([])
     const [llmResponse, setLlmResponse] = useState<any>(null)
     const [accumulatedChunks, setAccumulatedChunks] = useState<string>('')
+    const [isTransitioning, setIsTransitioning] = useState(false)
 
     // Handle LLM processing steps
     useEffect(() => {
         const lastStep = steps[steps.length - 1]
+        
+        // Handle chunk transition
+        if (lastStep?.startsWith('Processing chunk')) {
+            setIsTransitioning(true)
+            // Wait for the transition to complete before clearing
+            setTimeout(() => {
+                setAccumulatedChunks('')
+                setLlmResponse(null)
+                setIsTransitioning(false)
+            }, 300) // Match this with the CSS transition duration
+            return
+        }
+
         if (lastStep?.startsWith('LLM is processing:')) {
             const chunk = lastStep.replace('LLM is processing:', '').trim()
             setAccumulatedChunks(chunk)
@@ -79,6 +93,7 @@ export default function ProcessingSteps({ steps, text }: ProcessingStepsProps) {
                                 steps={llmSteps} 
                                 response={llmResponse}
                                 accumulatedChunks={accumulatedChunks}
+                                isTransitioning={isTransitioning}
                               />
                             : formatProcessingStep(step)
                         }

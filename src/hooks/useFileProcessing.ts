@@ -59,6 +59,13 @@ export function useFileProcessing() {
 
                                 switch (data.type) {
                                     case 'progress':
+                                        // If this is a new chunk processing message, remove any existing LLM output and reset insurance match
+                                        if (data.message.startsWith('Processing chunk')) {
+                                            currentResult.processingSteps = currentResult.processingSteps.filter(
+                                                step => !step.startsWith('LLM is processing:')
+                                            )
+                                            currentResult.insuranceMatch = null
+                                        }
                                         currentResult.processingSteps = [...currentResult.processingSteps, data.message]
                                         break
                                     case 'llm_chunk':
@@ -85,7 +92,12 @@ export function useFileProcessing() {
                                         }
                                         break
                                     case 'error':
-                                        currentResult.error = data.error
+                                        if (data.error === "Could not find selector name in the document") {
+                                            // Instead of setting error, we'll just continue to show manual selection
+                                            currentResult.processingSteps = [...currentResult.processingSteps, "Automatic name detection failed - please select manually"]
+                                        } else {
+                                            currentResult.error = data.error
+                                        }
                                         break
                                 }
 
@@ -95,12 +107,12 @@ export function useFileProcessing() {
                         }
                     }
                 }
-            } catch (err: any) {
+            } catch (error) {
                 setFileResults(prev => {
                     const newResults = [...prev]
                     newResults[i] = {
                         ...newResults[i],
-                        error: err.message || 'An error occurred'
+                        error: error instanceof Error ? error.message : 'An unknown error occurred'
                     }
                     return newResults
                 })
