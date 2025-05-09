@@ -8,9 +8,9 @@ const openAIConfig = new AiConfig();
 
 // Constants for token management
 const TOKEN_RESERVATION = {
-    SYSTEM_PROMPT: 2000,    // Reserve tokens for system prompt
-    RESPONSE: 1000,         // Reserve tokens for model response
-    BUFFER: 5000           // Additional buffer for safety
+    SYSTEM_PROMPT: 1000,    // Reserve tokens for system prompt
+    RESPONSE: 500,          // Reserve tokens for model response
+    BUFFER: 1000           // Additional buffer for safety
 };
 
 /**
@@ -26,6 +26,17 @@ async function processChunk(
     onProgress?: (chunk: string) => void
 ): Promise<PrimaryInsured | null> {
     try {
+        // Estimate tokens in the chunk
+        const chunkTokens = estimateTokenCount(chunk);
+        const maxTokens = openAIConfig.getMaxTokens();
+        const reservedTokens = TOKEN_RESERVATION.SYSTEM_PROMPT + 
+                             TOKEN_RESERVATION.RESPONSE + 
+                             TOKEN_RESERVATION.BUFFER;
+        
+        if (chunkTokens > maxTokens - reservedTokens) {
+            throw new TokenLimitError(`Chunk exceeds token limit: ${chunkTokens} tokens`);
+        }
+
         if (isStreaming) {
             const stream = await openAIConfig.createStreamingChatCompletion('extract_primary_insured', {
                 pdf_text: chunk
@@ -40,23 +51,50 @@ async function processChunk(
                 }
             }
 
-            if (!accumulatedContent) return null;
-            const parsedResult = JSON.parse(accumulatedContent);
-            return parsedResult.name ? { name: parsedResult.name } : null;
+            if (!accumulatedContent) {
+                throw new AIError('No content received from LLM');
+            }
+
+            try {
+                const parsedResult = JSON.parse(accumulatedContent);
+                if (!parsedResult.name) {
+                    throw new AIError('No name found in LLM response');
+                }
+                return { name: parsedResult.name };
+            } catch (error) {
+                const parseError = error as Error;
+                throw new AIError(`Failed to parse LLM response: ${parseError.message}`);
+            }
         } else {
             const response = await openAIConfig.createChatCompletion('extract_primary_insured', {
                 pdf_text: chunk
             });
 
             const content = response.choices[0].message.content;
-            if (!content) return null;
+            if (!content) {
+                throw new AIError('No content received from LLM');
+            }
 
-            const parsedResult = JSON.parse(content);
-            return parsedResult.name ? { name: parsedResult.name } : null;
+            try {
+                const parsedResult = JSON.parse(content);
+                if (!parsedResult.name) {
+                    throw new AIError('No name found in LLM response');
+                }
+                return { name: parsedResult.name };
+            } catch (error) {
+                const parseError = error as Error;
+                throw new AIError(`Failed to parse LLM response: ${parseError.message}`);
+            }
         }
     } catch (error) {
+        // Log the error for debugging
         console.error('Error processing chunk:', error);
-        return null;
+        
+        // Re-throw the error to be handled by the caller
+        if (error instanceof AIError) {
+            throw error;
+        }
+        throw new AIError(error instanceof Error ? error.message : 'Unknown error occurred');
     }
 }
 
@@ -84,18 +122,34 @@ async function processPrimaryInsuredExtraction(
         // Split text into chunks
         const chunks = splitIntoChunks(pdfText, availableTokens);
         
+        if (chunks.length === 0) {
+            throw new AIError('No valid text chunks to process');
+        }
+
+        if (options.isStreaming) {
+            options.onProgress?.(`Processing document in ${chunks.length} chunks...`);
+        }
+        
         // Process each chunk and collect results
+        let lastError: Error | null = null;
         for (let i = 0; i < chunks.length; i++) {
             if (options.isStreaming) {
                 options.onProgress?.(`Processing chunk ${i + 1} of ${chunks.length}...`);
             }
-            const result = await processChunk(chunks[i], options.isStreaming, options.onProgress);
-            if (result) {
-                return result;
+            try {
+                const result = await processChunk(chunks[i], options.isStreaming, options.onProgress);
+                if (result) {
+                    return result;
+                }
+            } catch (error) {
+                lastError = error instanceof Error ? error : new Error(String(error));
+                // Continue to next chunk if this one fails
+                continue;
             }
         }
 
-        throw new AIError('Could not find insured name in the document');
+        // If we've processed all chunks and found nothing, throw the last error or a generic one
+        throw lastError || new AIError('Could not find insured name in the document');
     } catch (error) {
         if (error instanceof Error) {
             if (error.message.includes('token')) {

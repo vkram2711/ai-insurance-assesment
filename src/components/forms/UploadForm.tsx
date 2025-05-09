@@ -163,6 +163,7 @@ export default function UploadForm({ onUpload, onRemoveFile, onManualSelect, isP
                             const result = fileResults[index]
                             const isExpanded = expandedFiles.has(index)
                             const hasResults = result && (result.text || result.insuranceMatch || result.error || result.processingSteps.length > 0)
+                            const currentStep = result?.processingSteps[result.processingSteps.length - 1]
 
                             return (
                                 <div key={index} className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -205,7 +206,7 @@ export default function UploadForm({ onUpload, onRemoveFile, onManualSelect, isP
                                                         </span>
                                                     ) : result.processingSteps.length > 0 ? (
                                                         <span className="text-blue-600 dark:text-blue-400">
-                                                            {result.processingSteps[result.processingSteps.length - 1]}
+                                                            {currentStep}
                                                         </span>
                                                     ) : null}
                                                 </div>
