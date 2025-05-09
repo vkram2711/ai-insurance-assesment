@@ -20,6 +20,10 @@ export async function POST(req: NextRequest) {
         await writer.write(encoder.encode(`data: ${JSON.stringify({type: 'llm_update', message})}\n\n`));
     };
 
+    const sendLLMChunk = async (chunk: string) => {
+        await writer.write(encoder.encode(`data: ${JSON.stringify({type: 'llm_chunk', chunk})}\n\n`));
+    };
+
     const sendResult = async (data: any) => {
         await writer.write(encoder.encode(`data: ${JSON.stringify({type: 'result', data})}\n\n`));
     };
@@ -27,6 +31,11 @@ export async function POST(req: NextRequest) {
     const sendError = async (error: string) => {
         await writer.write(encoder.encode(`data: ${JSON.stringify({type: 'error', error})}\n\n`));
         await writer.close();
+    };
+
+    const truncateText = (text: string, maxLength: number = 1000): string => {
+        if (text.length <= maxLength) return text;
+        return text.slice(0, maxLength) + '...';
     };
 
     void (async () => {
@@ -50,14 +59,14 @@ export async function POST(req: NextRequest) {
             await sendProgress(`Parsing ${file.type === FILE_TYPES.PDF ? 'PDF' : file.type === FILE_TYPES.TXT ? 'TXT' : 'DOCX'}...`);
             const text = await parseDocument(buffer, file.type as FileType)
             await sendProgress('Text extraction complete');
-            await sendResult({type: 'extracted_text', text: text});
+            await sendResult({type: 'extracted_text', text: truncateText(text)});
 
             await sendProgress('Extracting primary selector information...');
-            let llmOutput = '';
-            const primaryInsured = await streamExtractPrimaryInsured(text, (chunk) => {
-                llmOutput += chunk;
-                sendLLMUpdate(llmOutput);
-            });
+            const primaryInsured = await streamExtractPrimaryInsured(
+                text,
+                (info) => sendProgress(info),
+                (chunk) => sendLLMChunk(chunk)
+            );
 
             await sendProgress('Finding insurance match...');
             const insuranceMatch = await findIdByFuzzyName(primaryInsured.name)

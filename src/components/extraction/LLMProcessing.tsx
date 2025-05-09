@@ -2,11 +2,14 @@ interface LLMProcessingProps {
     step: string
     steps: string[]
     response: any
-    streamingText: string
+    accumulatedChunks: string
 }
 
-export default function LLMProcessing({ step, steps, response, streamingText }: LLMProcessingProps) {
+export default function LLMProcessing({ step, steps, response, accumulatedChunks }: LLMProcessingProps) {
     if (!step.startsWith('LLM is processing:')) return null
+
+    // Get the latest chunk from the step
+    const latestChunk = step.replace('LLM is processing:', '').trim()
 
     return (
         <div className="space-y-2">
@@ -26,10 +29,10 @@ export default function LLMProcessing({ step, steps, response, streamingText }: 
                     </div>
                 </div>
             </div>
-            {streamingText && (
+            {accumulatedChunks && (
                 <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded text-sm text-gray-700 dark:text-gray-300 overflow-x-auto">
-                    <div className="font-medium mb-1">LLM Response:</div>
-                    <pre className="whitespace-pre-wrap font-mono">{streamingText}</pre>
+                    <div className="font-medium mb-1">LLM Output:</div>
+                    <pre className="whitespace-pre-wrap font-mono">{accumulatedChunks}</pre>
                 </div>
             )}
             {response && (

@@ -9,46 +9,21 @@ interface ProcessingStepsProps {
 export default function ProcessingSteps({ steps, text }: ProcessingStepsProps) {
     const [llmSteps, setLlmSteps] = useState<string[]>([])
     const [llmResponse, setLlmResponse] = useState<any>(null)
-    const [streamingText, setStreamingText] = useState<string>('')
+    const [accumulatedChunks, setAccumulatedChunks] = useState<string>('')
 
     // Handle LLM processing steps
     useEffect(() => {
         const lastStep = steps[steps.length - 1]
         if (lastStep?.startsWith('LLM is processing:')) {
-            const parts = lastStep.split('{')
-            if (parts.length === 2) {
-                const processingInfo = parts[0].trim()
-                const jsonStr = '{' + parts[1]
+            const chunk = lastStep.replace('LLM is processing:', '').trim()
+            setAccumulatedChunks(chunk)
 
-                // Extract the processing step first
-                const newStep = processingInfo
-                    .replace('LLM is processing:', '')
-                    .trim()
-                    .split('...')
-                    .filter(step => step.trim())
-                    .pop() || ''
-
-                // Only add the step if it's not already in the list
-                setLlmSteps(prev => {
-                    if (prev.includes(newStep)) {
-                        return prev
-                    }
-                    return [...prev, newStep]
-                })
-
-                // Update streaming text
-                setStreamingText(jsonStr)
-
-                // Try to parse JSON, but don't fail if it's incomplete
-                try {
-                    // Check if the JSON string is complete
-                    if (jsonStr.trim().endsWith('}')) {
-                        const json = JSON.parse(jsonStr)
-                        setLlmResponse(json)
-                    }
-                } catch (error) {
-                    // Silently ignore JSON parsing errors during streaming
-                }
+            // Try to parse JSON, but don't fail if it's incomplete
+            try {
+                const json = JSON.parse(chunk)
+                setLlmResponse(json)
+            } catch (error) {
+                // Silently ignore JSON parsing errors during streaming
             }
         }
     }, [steps])
@@ -102,8 +77,8 @@ export default function ProcessingSteps({ steps, text }: ProcessingStepsProps) {
                             ? <LLMProcessing 
                                 step={step} 
                                 steps={llmSteps} 
-                                response={llmResponse} 
-                                streamingText={streamingText}
+                                response={llmResponse}
+                                accumulatedChunks={accumulatedChunks}
                               />
                             : formatProcessingStep(step)
                         }

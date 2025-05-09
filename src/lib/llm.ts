@@ -17,13 +17,15 @@ const TOKEN_RESERVATION = {
  * Process a single chunk of text to extract primary selector information
  * @param chunk The text chunk to process
  * @param isStreaming Whether to use streaming mode
- * @param onProgress Optional callback for streaming progress
+ * @param onChunkProgress Optional callback for chunk processing progress
+ * @param onLLMOutput Optional callback for LLM output
  * @returns Promise<PrimaryInsured | null> The extracted information or null if not found
  */
 async function processChunk(
     chunk: string,
     isStreaming: boolean,
-    onProgress?: (chunk: string) => void
+    onChunkProgress?: (info: string) => void,
+    onLLMOutput?: (content: string) => void
 ): Promise<PrimaryInsured | null> {
     try {
         // Estimate tokens in the chunk
@@ -47,7 +49,7 @@ async function processChunk(
                 const content = streamChunk.choices[0]?.delta?.content || '';
                 if (content) {
                     accumulatedContent += content;
-                    onProgress?.(content);
+                    onLLMOutput?.(accumulatedContent);
                 }
             }
 
@@ -108,7 +110,8 @@ async function processPrimaryInsuredExtraction(
     pdfText: string,
     options: {
         isStreaming: boolean;
-        onProgress?: (chunk: string) => void;
+        onChunkProgress?: (info: string) => void;
+        onLLMOutput?: (content: string) => void;
     }
 ): Promise<PrimaryInsured> {
     try {
@@ -127,18 +130,23 @@ async function processPrimaryInsuredExtraction(
         }
 
         if (options.isStreaming) {
-            options.onProgress?.(`Processing document in ${chunks.length} chunks...`);
+            options.onChunkProgress?.(`Processing document in ${chunks.length} chunks...`);
         }
 
         // Process each chunk and collect results
         let lastError: Error | null = null;
         for (let i = 0; i < chunks.length; i++) {
             if (options.isStreaming) {
-                options.onProgress?.(`Processing chunk ${i + 1} of ${chunks.length}...`);
+                options.onChunkProgress?.(`Processing chunk ${i + 1} of ${chunks.length}...`);
             }
             try {
-                const result = await processChunk(chunks[i], options.isStreaming, options.onProgress);
-                if (result) {
+                const result = await processChunk(
+                    chunks[i], 
+                    options.isStreaming, 
+                    options.onChunkProgress,
+                    options.onLLMOutput
+                );
+                if (result && result.name !== "undefined") {
                     return result;
                 }
             } catch (error) {
@@ -175,15 +183,18 @@ export async function extractPrimaryInsured(pdfText: string): Promise<PrimaryIns
 /**
  * Streams the extraction of primary selector information from PDF text using OpenAI's LLM
  * @param pdfText The text content extracted from the PDF
- * @param onProgress Callback function that receives progress updates
+ * @param onChunkProgress Callback function that receives information about chunk processing progress
+ * @param onLLMOutput Callback function that receives the raw LLM output
  * @returns Promise<PrimaryInsured> Object containing primary selector information
  */
 export async function streamExtractPrimaryInsured(
     pdfText: string,
-    onProgress: (chunk: string) => void
+    onChunkProgress: (info: string) => void,
+    onLLMOutput: (content: string) => void
 ): Promise<PrimaryInsured> {
     return processPrimaryInsuredExtraction(pdfText, {
         isStreaming: true,
-        onProgress
+        onChunkProgress,
+        onLLMOutput
     });
 }

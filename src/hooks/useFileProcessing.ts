@@ -61,14 +61,20 @@ export function useFileProcessing() {
                                     case 'progress':
                                         currentResult.processingSteps = [...currentResult.processingSteps, data.message]
                                         break
-                                    case 'llm_update':
-                                        currentResult.processingSteps = currentResult.processingSteps.map(step =>
+                                    case 'llm_chunk':
+                                        // Find the last LLM processing step or add a new one
+                                        const lastLLMStepIndex = currentResult.processingSteps.findLastIndex(step => 
                                             step.startsWith('LLM is processing:')
-                                                ? `LLM is processing: ${data.message}`
-                                                : step
                                         )
-                                        if (!currentResult.processingSteps.some(step => step.startsWith('LLM is processing:'))) {
-                                            currentResult.processingSteps.push(`LLM is processing: ${data.message}`)
+                                        
+                                        if (lastLLMStepIndex === -1) {
+                                            // No existing LLM step, add a new one
+                                            currentResult.processingSteps = [...currentResult.processingSteps, `LLM is processing: ${data.chunk}`]
+                                        } else {
+                                            // Update the existing LLM step with the complete accumulated content
+                                            const updatedSteps = [...currentResult.processingSteps]
+                                            updatedSteps[lastLLMStepIndex] = `LLM is processing: ${data.chunk}`
+                                            currentResult.processingSteps = updatedSteps
                                         }
                                         break
                                     case 'result':

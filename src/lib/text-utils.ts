@@ -24,95 +24,107 @@ export function splitIntoChunks(text: string, maxTokens: number): string[] {
     }
 
     const chunks: string[] = [];
+    const overlapTokens = Math.floor(maxTokens * 0.1); // 10% overlap between chunks
+    const effectiveMaxTokens = maxTokens - overlapTokens;
 
-    // Try to split by paragraphs first
+    // Split by paragraphs first
     const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim());
+    let currentChunk = '';
+    let currentTokens = 0;
 
     for (const paragraph of paragraphs) {
-        // If the paragraph fits within the token limit, add it as is
-        if (estimateTokenCount(paragraph) <= maxTokens) {
-            chunks.push(paragraph);
-            continue;
+        const paragraphTokens = estimateTokenCount(paragraph);
+
+        // If adding this paragraph would exceed the limit, start a new chunk
+        if (currentTokens + paragraphTokens > effectiveMaxTokens && currentChunk) {
+            chunks.push(currentChunk.trim());
+            // Start new chunk with overlap from previous chunk
+            const overlapText = getOverlapText(currentChunk, overlapTokens);
+            currentChunk = overlapText;
+            currentTokens = estimateTokenCount(overlapText);
         }
 
-        // Try to split by sentences
-        const sentences = paragraph
-            .match(/[^.!?]+[.!?]+/g)
-            ?.map(s => s.trim())
-            .filter(Boolean) || [paragraph];
+        // If a single paragraph is too large, split it by sentences
+        if (paragraphTokens > effectiveMaxTokens) {
+            const sentences = paragraph
+                .match(/[^.!?]+[.!?]+/g)
+                ?.map(s => s.trim())
+                .filter(Boolean) || [paragraph];
 
-        for (const sentence of sentences) {
-            // If the sentence fits within the token limit, add it as is
-            if (estimateTokenCount(sentence) <= maxTokens) {
-                chunks.push(sentence);
-                continue;
-            }
+            for (const sentence of sentences) {
+                const sentenceTokens = estimateTokenCount(sentence);
 
-            // Split sentence into words
-            const words = sentence.split(/\s+/).filter(w => w.trim());
-            let currentChunk = '';
-            let currentTokens = 0;
+                // If adding this sentence would exceed the limit, start a new chunk
+                if (currentTokens + sentenceTokens > effectiveMaxTokens && currentChunk) {
+                    chunks.push(currentChunk.trim());
+                    // Start new chunk with overlap from previous chunk
+                    const overlapText = getOverlapText(currentChunk, overlapTokens);
+                    currentChunk = overlapText;
+                    currentTokens = estimateTokenCount(overlapText);
+                }
 
-            for (const word of words) {
-                const wordTokens = estimateTokenCount(word);
-                const spaceTokens = currentChunk ? 1 : 0; // Account for space between words
+                // If a single sentence is too large, split it by words
+                if (sentenceTokens > effectiveMaxTokens) {
+                    const words = sentence.split(/\s+/).filter(w => w.trim());
+                    
+                    for (const word of words) {
+                        const wordTokens = estimateTokenCount(word);
+                        const spaceTokens = currentChunk ? 1 : 0;
 
-                // If a single word is too large, split it into parts
-                if (wordTokens > maxTokens) {
-                    // Add current chunk if it exists
-                    if (currentChunk) {
-                        chunks.push(currentChunk.trim());
-                        currentChunk = '';
-                        currentTokens = 0;
-                    }
-
-                    // Split the word into parts
-                    let part = '';
-                    let partTokens = 0;
-
-                    for (let i = 0; i < word.length; i++) {
-                        const char = word[i];
-                        const charTokens = estimateTokenCount(char);
-
-                        if (partTokens + charTokens > maxTokens) {
-                            if (part) {
-                                chunks.push(part);
-                                part = '';
-                                partTokens = 0;
-                            }
-                            part = char;
-                            partTokens = charTokens;
-                        } else {
-                            part += char;
-                            partTokens += charTokens;
+                        if (currentTokens + wordTokens + spaceTokens > effectiveMaxTokens && currentChunk) {
+                            chunks.push(currentChunk.trim());
+                            // Start new chunk with overlap from previous chunk
+                            const overlapText = getOverlapText(currentChunk, overlapTokens);
+                            currentChunk = overlapText;
+                            currentTokens = estimateTokenCount(overlapText);
                         }
-                    }
 
-                    if (part) {
-                        chunks.push(part);
+                        currentChunk += (currentChunk ? ' ' : '') + word;
+                        currentTokens += wordTokens + spaceTokens;
                     }
-                }
-                // If adding this word would exceed the limit, start a new chunk
-                else if (currentTokens + wordTokens + spaceTokens > maxTokens) {
-                    if (currentChunk) {
-                        chunks.push(currentChunk.trim());
-                    }
-                    currentChunk = word;
-                    currentTokens = wordTokens;
-                }
-                // Add word to current chunk
-                else {
-                    currentChunk += (currentChunk ? ' ' : '') + word;
-                    currentTokens += wordTokens + spaceTokens;
+                } else {
+                    currentChunk += (currentChunk ? ' ' : '') + sentence;
+                    currentTokens += sentenceTokens + (currentChunk ? 1 : 0);
                 }
             }
-
-            // Add any remaining chunk
-            if (currentChunk) {
-                chunks.push(currentChunk.trim());
-            }
+        } else {
+            currentChunk += (currentChunk ? '\n\n' : '') + paragraph;
+            currentTokens += paragraphTokens + (currentChunk ? 2 : 0);
         }
     }
 
+    // Add the last chunk if it exists
+    if (currentChunk) {
+        chunks.push(currentChunk.trim());
+    }
+
     return chunks;
+}
+
+/**
+ * Gets overlap text from the end of a chunk
+ * @param text The text to get overlap from
+ * @param overlapTokens Number of tokens to include in overlap
+ * @returns Overlap text
+ */
+function getOverlapText(text: string, overlapTokens: number): string {
+    const words = text.split(/\s+/);
+    let overlapText = '';
+    let overlapTokenCount = 0;
+
+    // Start from the end and work backwards
+    for (let i = words.length - 1; i >= 0; i--) {
+        const word = words[i];
+        const wordTokens = estimateTokenCount(word);
+        const spaceTokens = overlapText ? 1 : 0;
+
+        if (overlapTokenCount + wordTokens + spaceTokens > overlapTokens) {
+            break;
+        }
+
+        overlapText = word + (overlapText ? ' ' + overlapText : '');
+        overlapTokenCount += wordTokens + spaceTokens;
+    }
+
+    return overlapText;
 } 

@@ -46,7 +46,7 @@ export default function UploadForm({
                 <FileList
                     files={files}
                     fileResults={fileResults}
-                    isProcessing={isProcessing}
+                    isProcessing={isProcessing as boolean}
                     expandedFiles={expandedFiles}
                     onToggleExpand={handleToggleExpand}
                     onRemoveFile={handleRemoveFile}
